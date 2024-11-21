@@ -1,0 +1,340 @@
+{
+  "build": "py38h50d1736_1",
+  "build_number": 1,
+  "channel": "https://conda.anaconda.org/conda-forge/osx-64",
+  "constrains": [],
+  "depends": [
+    "python >=3.8,<3.9.0a0",
+    "python_abi 3.8.* *_cp38"
+  ],
+  "extracted_package_dir": "/opt/anaconda3/pkgs/wasabi-1.1.2-py38h50d1736_1",
+  "features": "",
+  "files": [
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/INSTALLER",
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/LICENSE",
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/METADATA",
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/RECORD",
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/REQUESTED",
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/WHEEL",
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/direct_url.json",
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/top_level.txt",
+    "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/zip-safe",
+    "lib/python3.8/site-packages/wasabi/__init__.py",
+    "lib/python3.8/site-packages/wasabi/__pycache__/__init__.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/__pycache__/compat.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/__pycache__/markdown.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/__pycache__/printer.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/__pycache__/tables.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/__pycache__/traceback_printer.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/__pycache__/util.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/compat.py",
+    "lib/python3.8/site-packages/wasabi/markdown.py",
+    "lib/python3.8/site-packages/wasabi/printer.py",
+    "lib/python3.8/site-packages/wasabi/tables.py",
+    "lib/python3.8/site-packages/wasabi/tests/__init__.py",
+    "lib/python3.8/site-packages/wasabi/tests/__pycache__/__init__.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_jupyter.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_markdown.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_printer.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_tables.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_traceback.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_util.cpython-38.pyc",
+    "lib/python3.8/site-packages/wasabi/tests/test-data/wasabi-test-notebook.ipynb",
+    "lib/python3.8/site-packages/wasabi/tests/test_jupyter.py",
+    "lib/python3.8/site-packages/wasabi/tests/test_markdown.py",
+    "lib/python3.8/site-packages/wasabi/tests/test_printer.py",
+    "lib/python3.8/site-packages/wasabi/tests/test_tables.py",
+    "lib/python3.8/site-packages/wasabi/tests/test_traceback.py",
+    "lib/python3.8/site-packages/wasabi/tests/test_util.py",
+    "lib/python3.8/site-packages/wasabi/traceback_printer.py",
+    "lib/python3.8/site-packages/wasabi/util.py"
+  ],
+  "fn": "wasabi-1.1.2-py38h50d1736_1.conda",
+  "license": "MIT",
+  "link": {
+    "source": "/opt/anaconda3/pkgs/wasabi-1.1.2-py38h50d1736_1",
+    "type": 1
+  },
+  "md5": "dfb3cea4e5e0627e20d2e10a68fb5c04",
+  "name": "wasabi",
+  "package_tarball_full_path": "/opt/anaconda3/pkgs/wasabi-1.1.2-py38h50d1736_1.conda",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/INSTALLER",
+        "path_type": "hardlink",
+        "sha256": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+        "sha256_in_prefix": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+        "size_in_bytes": 5
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/LICENSE",
+        "path_type": "hardlink",
+        "sha256": "5451063f2f9fa7ddc9541f710daebd54c3f44592caf16f6f98626c3213bec93d",
+        "sha256_in_prefix": "5451063f2f9fa7ddc9541f710daebd54c3f44592caf16f6f98626c3213bec93d",
+        "size_in_bytes": 1079
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/METADATA",
+        "path_type": "hardlink",
+        "sha256": "553b564b1d8df453660405e1d0872e41bbc234af4d0928cff9372cd657275bf1",
+        "sha256_in_prefix": "553b564b1d8df453660405e1d0872e41bbc234af4d0928cff9372cd657275bf1",
+        "size_in_bytes": 28727
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/RECORD",
+        "path_type": "hardlink",
+        "sha256": "97940bedef829efe528b6919489416563c83487e524d65bc9e5901b2e55b0604",
+        "sha256_in_prefix": "97940bedef829efe528b6919489416563c83487e524d65bc9e5901b2e55b0604",
+        "size_in_bytes": 2681
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/REQUESTED",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/WHEEL",
+        "path_type": "hardlink",
+        "sha256": "189eedfe4581172c1b6a02b97a8f48a14c0b5baa3239e4ca990fbd8871553714",
+        "sha256_in_prefix": "189eedfe4581172c1b6a02b97a8f48a14c0b5baa3239e4ca990fbd8871553714",
+        "size_in_bytes": 92
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/direct_url.json",
+        "path_type": "hardlink",
+        "sha256": "eb8a4941c9ab5a1bab28bb35cc1d4704ac9d88e5e09443df1758979106f6b1a8",
+        "sha256_in_prefix": "eb8a4941c9ab5a1bab28bb35cc1d4704ac9d88e5e09443df1758979106f6b1a8",
+        "size_in_bytes": 94
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/top_level.txt",
+        "path_type": "hardlink",
+        "sha256": "5bdb235df262fe702d43e8e31cc62c7de4a5c539a789d513e848343ea218c643",
+        "sha256_in_prefix": "5bdb235df262fe702d43e8e31cc62c7de4a5c539a789d513e848343ea218c643",
+        "size_in_bytes": 7
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi-1.1.2.dist-info/zip-safe",
+        "path_type": "hardlink",
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "sha256_in_prefix": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "size_in_bytes": 1
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "d9328f16a12e6eba9ffff065577c7677f696f308e52a3eaf276bed6646aadbae",
+        "sha256_in_prefix": "d9328f16a12e6eba9ffff065577c7677f696f308e52a3eaf276bed6646aadbae",
+        "size_in_bytes": 311
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/__pycache__/__init__.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "e6e462f9678f58582a49660be0a9be76f416a199f7c7c6654c9d88173e63e95a",
+        "sha256_in_prefix": "e6e462f9678f58582a49660be0a9be76f416a199f7c7c6654c9d88173e63e95a",
+        "size_in_bytes": 495
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/__pycache__/compat.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "7a2d336f748e61dcc154700f40e05267e8d34acb54b94b48c53b252d3110bfe9",
+        "sha256_in_prefix": "7a2d336f748e61dcc154700f40e05267e8d34acb54b94b48c53b252d3110bfe9",
+        "size_in_bytes": 284
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/__pycache__/markdown.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "170097135607ed56b7c783e4f176240b53e075843d0e10a60481ab814855bc23",
+        "sha256_in_prefix": "170097135607ed56b7c783e4f176240b53e075843d0e10a60481ab814855bc23",
+        "size_in_bytes": 5402
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/__pycache__/printer.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "2b970d5e34b4147869f61aebc4d2d92cae1deb48358a61b0080412cbaec2dad0",
+        "sha256_in_prefix": "2b970d5e34b4147869f61aebc4d2d92cae1deb48358a61b0080412cbaec2dad0",
+        "size_in_bytes": 10917
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/__pycache__/tables.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "2ee17c4871921b0303c1a02d2b3ade18e61b3667fd54ffd4adfbaa19cb874eae",
+        "sha256_in_prefix": "2ee17c4871921b0303c1a02d2b3ade18e61b3667fd54ffd4adfbaa19cb874eae",
+        "size_in_bytes": 6845
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/__pycache__/traceback_printer.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "59a1a6f4c9133d6097a542f9059809d544e56dabc308b2b9309a54c314600348",
+        "sha256_in_prefix": "59a1a6f4c9133d6097a542f9059809d544e56dabc308b2b9309a54c314600348",
+        "size_in_bytes": 4749
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/__pycache__/util.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "aa335ceb0220976d2ae6462b9e75bad5cdff487663ad2725ac6d4c0b96496163",
+        "sha256_in_prefix": "aa335ceb0220976d2ae6462b9e75bad5cdff487663ad2725ac6d4c0b96496163",
+        "size_in_bytes": 6782
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/compat.py",
+        "path_type": "hardlink",
+        "sha256": "2b2bc5547d8556cedfd024c4f41d3cc4d0537b214ff40e65174cf2733a824522",
+        "sha256_in_prefix": "2b2bc5547d8556cedfd024c4f41d3cc4d0537b214ff40e65174cf2733a824522",
+        "size_in_bytes": 206
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/markdown.py",
+        "path_type": "hardlink",
+        "sha256": "8804213521ef72c166a88a4a1edbfa9f3651a043983937a4f047c401d9205856",
+        "sha256_in_prefix": "8804213521ef72c166a88a4a1edbfa9f3651a043983937a4f047c401d9205856",
+        "size_in_bytes": 4229
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/printer.py",
+        "path_type": "hardlink",
+        "sha256": "ebf70123ef97ac8a2fae71dda5047edd8c2907ccd8f6c35c86e97fe096c37cfd",
+        "sha256_in_prefix": "ebf70123ef97ac8a2fae71dda5047edd8c2907ccd8f6c35c86e97fe096c37cfd",
+        "size_in_bytes": 12305
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tables.py",
+        "path_type": "hardlink",
+        "sha256": "46ed7ed37d29f219cac211642105b2772ffff5213c74648e39a20f0bc204fdcc",
+        "sha256_in_prefix": "46ed7ed37d29f219cac211642105b2772ffff5213c74648e39a20f0bc204fdcc",
+        "size_in_bytes": 6773
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/__pycache__/__init__.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "322bfd6b16c8ec98075f6d8110822c1a0c83833872735f449be4e381658d69ec",
+        "sha256_in_prefix": "322bfd6b16c8ec98075f6d8110822c1a0c83833872735f449be4e381658d69ec",
+        "size_in_bytes": 143
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_jupyter.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "3273761ffaa66d65ebd87403e98aaf31399aec7f9954df16cb40e5790d89b29f",
+        "sha256_in_prefix": "3273761ffaa66d65ebd87403e98aaf31399aec7f9954df16cb40e5790d89b29f",
+        "size_in_bytes": 770
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_markdown.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "91500393870cc9c470d7ed94f1e44a03cecb1be2a33a4b10d3ce517cb58bfb79",
+        "sha256_in_prefix": "91500393870cc9c470d7ed94f1e44a03cecb1be2a33a4b10d3ce517cb58bfb79",
+        "size_in_bytes": 1365
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_printer.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "064f555896c2f1c32ec9ec5953bcd36cccd91dd6207f78bb1034678f408d88c5",
+        "sha256_in_prefix": "064f555896c2f1c32ec9ec5953bcd36cccd91dd6207f78bb1034678f408d88c5",
+        "size_in_bytes": 7494
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_tables.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "0e62614342c951fef69baf70a239b899282ae7300d17aee71dc579dca593a39b",
+        "sha256_in_prefix": "0e62614342c951fef69baf70a239b899282ae7300d17aee71dc579dca593a39b",
+        "size_in_bytes": 13368
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_traceback.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "14e316991dc2e4741db49504939a833e9f928c8f3a3e4a1f178a530dddac8333",
+        "sha256_in_prefix": "14e316991dc2e4741db49504939a833e9f928c8f3a3e4a1f178a530dddac8333",
+        "size_in_bytes": 2231
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/__pycache__/test_util.cpython-38.pyc",
+        "path_type": "hardlink",
+        "sha256": "b20fa56450dae4e07c549689e20babbdbffb118fccfd873f7513ab5c8a30582f",
+        "sha256_in_prefix": "b20fa56450dae4e07c549689e20babbdbffb118fccfd873f7513ab5c8a30582f",
+        "size_in_bytes": 2568
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/test-data/wasabi-test-notebook.ipynb",
+        "path_type": "hardlink",
+        "sha256": "269feff53bb6fefc0f1d91afd165ebe209d8e3df1f6fcb0dd4f40f94bb6c0499",
+        "sha256_in_prefix": "269feff53bb6fefc0f1d91afd165ebe209d8e3df1f6fcb0dd4f40f94bb6c0499",
+        "size_in_bytes": 835
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/test_jupyter.py",
+        "path_type": "hardlink",
+        "sha256": "413c3ffd27b6d34d3737f467f363fc3469fca1397acf5749be6810c30c998c31",
+        "sha256_in_prefix": "413c3ffd27b6d34d3737f467f363fc3469fca1397acf5749be6810c30c998c31",
+        "size_in_bytes": 1122
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/test_markdown.py",
+        "path_type": "hardlink",
+        "sha256": "2c05dac394daff94a12f8f4abbf4c21f946e495f3c85bc3294e83890f349bd29",
+        "sha256_in_prefix": "2c05dac394daff94a12f8f4abbf4c21f946e495f3c85bc3294e83890f349bd29",
+        "size_in_bytes": 1173
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/test_printer.py",
+        "path_type": "hardlink",
+        "sha256": "9cb9b9a8b6afcc099c08ce3b906b2aa18e5f6a240e246de50253d82b5de57a9d",
+        "sha256_in_prefix": "9cb9b9a8b6afcc099c08ce3b906b2aa18e5f6a240e246de50253d82b5de57a9d",
+        "size_in_bytes": 7354
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/test_tables.py",
+        "path_type": "hardlink",
+        "sha256": "957fe84f01a53b4d5fa4d116500000d0ad344076c928f8e940bc9b831db70454",
+        "sha256_in_prefix": "957fe84f01a53b4d5fa4d116500000d0ad344076c928f8e940bc9b831db70454",
+        "size_in_bytes": 17497
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/test_traceback.py",
+        "path_type": "hardlink",
+        "sha256": "0e4c3a28f57f94b6250502527d53fff5ab3eb643f1e22e827cef1bca8cd16f44",
+        "sha256_in_prefix": "0e4c3a28f57f94b6250502527d53fff5ab3eb643f1e22e827cef1bca8cd16f44",
+        "size_in_bytes": 1622
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/tests/test_util.py",
+        "path_type": "hardlink",
+        "sha256": "ff258ab0e338c00bea19b01e5cdb00b235504b3f5239b6b614c741138ea7f038",
+        "sha256_in_prefix": "ff258ab0e338c00bea19b01e5cdb00b235504b3f5239b6b614c741138ea7f038",
+        "size_in_bytes": 2453
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/traceback_printer.py",
+        "path_type": "hardlink",
+        "sha256": "9673403ad53e2a7285c937df54c22e009b03d0038c859862f34855b77b05d3a4",
+        "sha256_in_prefix": "9673403ad53e2a7285c937df54c22e009b03d0038c859862f34855b77b05d3a4",
+        "size_in_bytes": 4834
+      },
+      {
+        "_path": "lib/python3.8/site-packages/wasabi/util.py",
+        "path_type": "hardlink",
+        "sha256": "c50666ffd3e05ef56f278644b1914d8a55ec008f1b9482ef5903326dd122256a",
+        "sha256_in_prefix": "c50666ffd3e05ef56f278644b1914d8a55ec008f1b9482ef5903326dd122256a",
+        "size_in_bytes": 7260
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "None",
+  "sha256": "846018909bd7a2249854de19c765a3efac805bab58dcb05edb5483ba8b725395",
+  "size": 47905,
+  "subdir": "osx-64",
+  "timestamp": 1715409969000,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/osx-64/wasabi-1.1.2-py38h50d1736_1.conda",
+  "version": "1.1.2"
+}

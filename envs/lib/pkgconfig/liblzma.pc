@@ -1,0 +1,20 @@
+#
+# Author: Lasse Collin
+#
+# This file has been put into the public domain.
+# You can do whatever you want with this file.
+#
+
+prefix=/Users/gkacton/Desktop/hist426/envs
+exec_prefix=/Users/gkacton/Desktop/hist426/envs
+libdir=/Users/gkacton/Desktop/hist426/envs/lib
+includedir=/Users/gkacton/Desktop/hist426/envs/include
+
+Name: liblzma
+Description: General purpose data compression library
+URL: https://xz.tukaani.org/xz-utils/
+Version: 5.4.6
+Cflags: -I${includedir}
+Cflags.private: -DLZMA_API_STATIC
+Libs: -L${libdir} -llzma
+Libs.private: -pthread -lpthread

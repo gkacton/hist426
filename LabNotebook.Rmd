@@ -1,0 +1,345 @@
+---
+title: "Lab Notebook"
+author: "Grace Acton"
+output: 
+  pdf_document:
+    highlight: tango
+---
+```{r load-packages}
+library(tidyverse)
+library(reticulate)
+library(knitr)
+library(kableExtra)
+```
+# Research Questions
+**What histories are prioritized in National History Bowl questions, and how is this related to high school history curricula?**
+
+**To what extent are NHB questions overrepresenting/underrepresenting women, the global south, and military history?**
+
+
+## Project Data
+
+This project analyzes thirty National History Bowl packets, each consisting of 56 to 61 questions. These sets represent two academic years: the first year available (2015-2016) and last year available (2021-2022). To glean a representative sample of each year, the first 5 packets from the C, A, and Nationals sets were chosen. B-sets were omitted due to their frequently similar difficulty level to C-sets. 
+
+Each question was copied from the PDF packet document available on the IAC website and read for OCR errors. During the transcription process, I read each question for women's names, using Google and Wikipedia to investigate unfamiliar names. I want to note that gender is a complicated, highly personal identity, and identifying women in history necessitates making many assumptions. I want to acknowledge that transgender, nonbinary, Two Spirit, and other people outside the western gender binary have always existed, whether our historical record includes them or not, and it is impossible to say whether I have correctly identified the gender of all individuals named in this data set. 
+
+Secondary to this important acknowledgement, I want to make clear my intent behind two additional metadata categories, `is_fictional` and `is_myth`. Many questions that are **about** a male author mention female characters from their works; I think it is important to differentiate between women historical figures, and fictional women. However, there are also female and feminine figures in many mythological and religious systems, who I don't feel should be categorized the same way as literary characters. For example, there are questions about several Greek and Roman goddesses; even if, say, Athena does not feel "real" to me, she did to the people who worshiped her. As such, religious and mythological figures are separated from literary characters in my metadata scheme. If a named woman is a literary figure, then `is_fictional = TRUE`, whereas if she is a mythological or religious entity, `is_myth = TRUE`. 
+
+Lastly, there is the issue of distinguishing questions which mention a woman from questions **about** a woman -- that is, questions for which the answer is a named woman. To facilitate the separation of these two categories, the field `is_answer` will have value `TRUE` when a woman is the answer to the question, but remain `FALSE` if she is merely mentioned in a question whose answer is a different historical topic. 
+
+Below is a data dictionary for the dataframes `nhbb`, and `nhbb_clean`
+
+```{r data-dict}
+data_dict <- read.csv("data_dict_nhbb.csv")
+kable(data_dict) %>% 
+  kable_styling(latex_options = "striped",
+                full_width = T) %>% 
+  column_spec(3, width = "3in")
+```
+
+# Data Import and Cleaning
+
+  Although there has already been an element of human oversight of the questions -- namely, my reading the questions as I transcribed them in order to detect OCR errors and identify womens names -- some formatting elements of National History Bowl questions are easier to remove or rectify in an automated fashion. Many questions contain pronunciation guides, which aren't necessary to this analysis. Additionally, special characters are used in fourth quarter questions to identify the cut-off points between the 30-point, 20-point, and 10-point portions of the questions. As an exemplar of the complex formatting of a fourth quarter question, I provide Question 5 from Quarter 4 of Round 2 of the 2022 National Championship:
+  
+**This country resettled Jewish refugees from Nazi Germany in the town of Sosúa [[soh-SOO-ah]] after the Évian Conference. During one massacre in this country, the fate of the victims was determined by how they pronounced the term "perejil'' [[peh-reh-HEEL]] (+)</u> when soldiers held up a certain herb. One leader of this country had several thousands migrants from a neighboring country killed in the Parsley Massacre and was nicknamed "El (*)** Jefe" [[HE-feh]]. For ten points, name this Caribbean country that was ruled for over thirty years by Rafael Trujillo [[troo-HEE-yoh]] from Santo Domingo.
+
+This question has special characters "(+)" and "(*)", as well as double-bracketed pronunciation guides, all of which are superfluous to the text necessary for my analysis. The script `data_prep.R` uses the `stringr` package to remove these additional characters, leaving just the plaintext of the questions.
+
+Additionally, the `data_prep.R` script uses data about the packets and questions to generate a unique identifier for each question and answer. This identifier is ispired by a standard museum object labeling format, which takes the form of `year.accession.box.object`. In this case, I have amended the format to be `year.set.tournament_round.quarter.question_number`. _Quarter 3 questions have an additional digit indicated which thematic lightning round option the question was part of._ 
+
+When questions and answers are written to text files, the ID number is followed by an underscore and an additional identifier: `_q` for question, `_a` for answer, `_bonus_q` for quarter 2 bonus questions, or `_bonus_a` for answers to quarter 2 bonus questions. Creating separate files for questions and answers allow them to be analyzed separately, and embedding these identifiers into the file names will allow me to easily separate questions from answers, while having a shared ID number maintains the connection between a question and its corresponding answer. 
+
+```{r setup, echo=F, message=F}
+# use tidyverse packages for data cleaning
+library(tidyverse)
+
+# use reticulate package to access python
+library(reticulate)
+
+# use knitr and kableextra to create tables
+library(knitr)
+library(kableExtra)
+
+# use virtual environment
+use_condaenv("~/Desktop/hist426/envs")
+
+```
+
+```{r data-source, message=F}
+# use data prep script as source - script available in GitHub
+source("data_prep.R")
+
+kable(head(nhbb_clean %>% select(ID, q_text, a_text))) %>% 
+  kable_styling(latex_options = "striped",
+                full_width = T) %>% 
+  column_spec(2, width = "6in")
+```
+
+# Statistical Analysis #1: Women's Inclusion/Exclusion
+
+### 1. For how many questions is the answer a woman?
+
+First, we need to know the total number of questions in the corpus. This is not so simple as knowing the number of rows in the data frame, because bonus questions are included in the same row as the tossup they were written to complement. So, to get the total number of questions, I need to know the number of tossups and the number of bonuses, and add them together. 
+
+```{r total-num-questions}
+num_bonus <- nrow(nhbb_clean %>% filter(bonus_q_text != "")) # number of bonuses
+num_tossup <- nrow(nhbb_clean %>% filter(q_text != ""))
+
+total_qs <- num_bonus + num_tossup
+total_qs
+```
+Next I will count the number of rows which I've tagged as having a woman as the answer/
+
+```{r}
+woman_answers <- nhbb_clean %>% 
+  filter(is_answer == T)
+nrow(woman_answers)
+```
+
+43 out of 1774 questions have a woman as the answer, or `r round(100*43/1774, digits = 2)` percent. 
+
+The following block of code creates a dataframe consisting only of questions which have a woman as the answer. 
+
+```{r woman-qs}
+# filter nhbb_clean to only questions that have a woman as the answer
+woman_answers <- nhbb_clean %>% 
+  filter(is_answer == T)
+
+# establish a new df for writing these questions to
+
+woman_qs <- as.data.frame(matrix(ncol = 4, nrow = nrow(woman_answers)))
+colnames(woman_qs) <- c("ID", "question", "answer", "type") 
+
+# write only questions for which the woman is the answer to the new df
+for (i in 1:nrow(woman_answers)){
+  if(woman_answers$a_text[i] %in% woman_answers$names[i] == TRUE | 
+     woman_answers$names[i] %in% woman_answers$a_text[i] == TRUE |
+     grepl(woman_answers$a_text[i], woman_answers$names[i]) == TRUE |
+     grepl(woman_answers$names[i], woman_answers$a_text[i]) == TRUE) {
+    woman_qs$ID[i] <- woman_answers$ID[i]
+    woman_qs$question[i] <- woman_answers$q_text[i]
+    woman_qs$answer[i] <- woman_answers$a_text[i]
+    woman_qs$type[i] <- "tossup/lightning"
+  } else if(woman_answers$bonus_a_text[i] %in% woman_answers$names[i] == TRUE | 
+            woman_answers$names[i] %in% woman_answers$bonus_a_text[i] == TRUE |
+            grepl(woman_answers$bonus_a_text[i], woman_answers$names[i]) == TRUE |
+            grepl(woman_answers$names[i], woman_answers$bonus_a_text[i]) == TRUE){
+    woman_qs$ID[i] <- woman_answers$ID[i]
+    woman_qs$question[i] <- woman_answers$bonus_q_text[i]
+    woman_qs$answer[i] <- woman_answers$bonus_a_text[i]
+    woman_qs$type[i] <- "bonus"
+  }
+}
+
+# fix the "type" column and include lightning lead-ins to question text
+
+for (j in 1:nrow(woman_qs)) {
+  if(grepl("lightning", woman_qs$ID[j]) == TRUE){
+    woman_qs$type[j] <- "lightning"
+    woman_qs$question[j] <- paste(woman_answers$lightning_lead[j], woman_answers$q_text[j], sep = "")
+  } else if(woman_qs$type[j] == "tossup/lightning" & 
+            grepl("lightning", woman_qs$ID[j]) == FALSE){
+    woman_qs$type[j] <- "tossup"
+  }
+}
+
+# print as kable table
+kable(woman_qs) %>%
+  kable_styling(full_width = T) %>% 
+  column_spec(1, width = "15%") %>% 
+  column_spec(2, width = "50%") 
+```
+
+
+### 2. How many questions mention a woman by name?
+
+To answer this question, I can again use my metadata tags and the `dplyr::filter()` function.
+
+```{r woman-mentioned}
+woman_named <- nhbb_clean %>% 
+  filter(woman_named == T) 
+
+# number of questions that contain a named woman
+nrow(woman_named)
+```
+However, some of these may be questions for which the *answer* is a woman, but not mention a woman by name in the question text. It would be more accurate to filter out those questions which have a woman as the answer, and only add them back in if they contain another woman's name.
+
+```{r woman-named-q-only}
+
+# establish a new df for writing these questions to
+
+woman_named_df <- as.data.frame(matrix(ncol = 4, nrow = nrow(nhbb_clean)))
+colnames(woman_named_df) <- c("ID", "names", "answer", "type") 
+
+# write questions to this new df
+nhbb_clean <- nhbb_clean %>% 
+  filter(is.na(woman_named) == FALSE)
+
+for (i in 1:nrow(nhbb_clean)) {
+  if(nhbb_clean$woman_named[i] == TRUE & nhbb_clean$is_answer[i] == FALSE){
+      woman_named_df$ID[i] <- nhbb_clean$ID[i]
+      woman_named_df$names[i] <- nhbb_clean$names[i]
+      woman_named_df$answer[i] <- nhbb_clean$a_text[i]
+      woman_named_df$type[i] <- nhbb_clean$type[i]
+  } else if(nhbb_clean$woman_named[i] == TRUE & nhbb_clean$is_answer[i] == TRUE) {
+      names_vec <- as.list(strsplit(nhbb_clean$names[i], ", ")[[1]])
+      if(length(names_vec) > 1) {
+        woman_named_df$ID[i] <- nhbb_clean$ID[i]
+        woman_named_df$names[i] <- nhbb_clean$names[i]
+        woman_named_df$answer[i] <- nhbb_clean$a_text[i]
+        woman_named_df$type[i] <- nhbb_clean$type[i]
+      }
+    }
+} 
+
+woman_named_df <- woman_named_df %>% 
+  filter(is.na(names) == FALSE) %>% 
+  filter(names != answer)
+```
+
+So, of those 1774 total questions, `r round(100*nrow(woman_named_df)/1774, digits = 2)` percent mention a woman by name. 
+
+### 3. Has the proportion of questions and answers that mention women changed over time?
+
+Let's get the IDs of questions that name a woman or have a woman answer, and use them to filter the original NHBB data.
+
+```{r question-ids}
+woman_ids <- unique(c(woman_answers$ID, woman_named_df$ID))
+
+nhbb_women <- nhbb_clean %>% 
+  filter(ID %in% woman_ids) %>% 
+  mutate(q_or_a = if_else(is_answer == TRUE, "answer", "question"))
+```
+
+```{r group-years}
+women_year <- nhbb_women %>% 
+  group_by(year) %>% 
+  count(name = "women")
+
+total_year <- nhbb_clean %>% 
+  group_by(year) %>% 
+  count(name = "total")
+
+years <- left_join(women_year, total_year, by = "year") 
+years <- years %>% 
+  mutate(proportion = round(women/total, digits = 4))
+
+years
+
+```
+
+Using a Chi-Squared test will let me see if the proportion of questions that feature women is likely to be related to the year the questions were written.
+
+```{r chi-sq}
+# variables: year and proportion
+# null hypothesis: the proportion of questions that feature women is unrelated to the year the set was written
+
+chisq_data <- as.data.frame(years)
+rownames(chisq_data) <- chisq_data$year
+chisq_data <- chisq_data %>% 
+  select(-proportion) %>% 
+  mutate(no_women = total-women) %>% 
+  select(-total, -year)
+
+
+chisq <- chisq.test(chisq_data)
+chisq
+chisq$observed
+chisq$expected
+```
+
+The Chi-squared test of independence produced a p-value of 0.3811, meaning that any difference in the proportion of questions about women from year to year is likely due to randomness. Thus, the proportion of questions about women is probably *not* related to the year the questions were written. 
+
+### 4. Is the proportion of questions about women related to the difficulty level of the set?
+
+This is the same sort of analytical approach I applied to the years. I'll once again conduct a chi-squared test to see if these two variables are independent of each other. 
+
+```{r group-difficulty}
+women_set <- nhbb_women %>% 
+  group_by(set) %>% 
+  count(name = "women")
+
+total_set <- nhbb_clean %>% 
+  group_by(set) %>% 
+  count(name = "total")
+
+sets <- left_join(women_set, total_set, by = "set") 
+sets <- sets %>% 
+  mutate(proportion = round(women/total, digits = 4))
+
+sets
+```
+```{r chi-sq-sets}
+# variables: year and proportion
+# null hypothesis: the proportion of questions that feature women is unrelated to the year the set was written
+
+chisq_data <- as.data.frame(sets)
+rownames(chisq_data) <- chisq_data$set
+chisq_data <- chisq_data %>% 
+  select(-proportion) %>% 
+  mutate(no_women = total-women) %>% 
+  select(-total, -set)
+
+
+chisq <- chisq.test(chisq_data)
+chisq
+chisq$observed
+chisq$expected
+```
+Once again, these two variables are likely not related. 
+
+
+```{python, include = F}
+# import spaCy
+# import spacy
+# 
+# # import pandas DataFrame packages
+# import pandas as pd
+```
+
+```{python, include = F}
+# nhbb_spacy=pd.read_csv("nhbb_clean.csv")
+# nlp = spacy.load("en_core_web_sm")
+# 
+# # tokenize questions
+#   # define function to use nlp function on texts
+# def process_text(text):
+#   return nlp(text)
+#   # define function to return list of tokens for each text
+# def get_token(doc):
+#   return [(token.text) for token in doc]
+#   # define function to get part of speech for each token
+# def get_pos(doc):
+#   return [(token.pos_, token.tag_) for token in doc]
+# 
+# nhbb_spacy['q_text_doc'] = nhbb_spacy['q_text_clean'].apply(process_text)
+# nhbb_spacy['q_text_tokens'] = nhbb_spacy['q_text_doc'].apply(get_token)
+# nhbb_spacy['q_text_pos'] = nhbb_spacy['q_text_doc'].apply(get_pos)
+# ```
+# 
+# Extracting Proper Nouns
+# ```{python, include = F}
+# def extract_prop_nouns(doc):
+#   return [token.text for token in doc if token.pos_ == 'PROPN']
+# 
+# nhbb_spacy['prop_nouns'] = nhbb_spacy['q_text_doc'].apply(extract_prop_nouns)
+```
+
+```{r, include=F}
+# nhbb_spacyr <- py_to_r(py$nhbb_spacy)
+# prop_nouns <- nhbb_spacyr %>% 
+#   select(prop_nouns) 
+# 
+# # count instances of each proper noun
+# for (i in 1:nrow(prop_nouns)){
+#   prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "c\\(")
+#   prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "\\)")
+# }
+# 
+# prop_nouns_count <- prop_nouns %>% 
+#   separate_longer_delim(cols = prop_nouns, delim = ",") %>%
+#   group_by(prop_nouns) %>%
+#   count()
+
+```
+

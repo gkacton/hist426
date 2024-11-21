@@ -1,0 +1,131 @@
+# Introduction
+  
+International Academic Competitions was founded by _Jeopardy!_ champion David Madden in 2010. Upon the company's founding, they ran just two events: the team-based National History Bowl, and the individual National History Bee. Over the past 15 years, IAC has developed numerous other competitions based around additional subject areas, including the National Geography Bee and Bowl, National Science Bee, United States Geography Bee and Geography Championships, and the general-knowledge National Academic Bee and Bowl.
+  
+## Disclosure
+In high school, I competed in the National History Bee and Bowl, including a trip to the national championship. Additionally, I worked as a question writer for International Academic Competitions from 2020 to 2022, and wrote the first two National Women's History Exams. 
+  
+## What is the National History Bowl?
+The National History Bowl is a buzzer-based team trivia competition which is now split into varsity, junior varsity, middle, and elementary school divisions. History Bowl teams typically attend four competitions throughout an academic year, each of which uses a different set of questions. These question sets are labelled as C, B, A, and Nationals level. The first competition uses the C-set, which is intended to be the easiest questions, with each following competition scaling up in difficulty; thus, B-set is meant to be more difficult then C-set, A-set harder than B, and National Championship questions being the most difficult and obscure. Within each tournament, teams compete in at least 5 preliminary rounds, followed by up to 5 additional playoff rounds to determine the tournament champion. Teams finishing in the top 50% of the field at a Regional Tournament (A, B, or C set) qualify to compete at the National Championship, which is traditionally held at the Crystal Gateway Marriot in Washington, D.C. 
+  
+## Structure of a Question Set
+Each history bowl round, or "packet", consists of four rounds. The first round is constructed of "tossups". Any player from either team may buzz in and answer the question at any point during the reading of the question, and will receive 10 points if they are correct. The second round is the "tossup + bonus" round; the tossups work the same as in round one, but if the player answers correctly, the team is given a bonus question. Unlike in tossups, teams may confer on bonus questions, and if it is answered incorrectly it does not "bounce back" to the other team. The third quarter is informally referred to as the "lightning round". The packet has three sets of eight very short questions, with each set sharing a theme and lead-in to the question. Both teams are read the list of thematic options, and the team that is behind in points gets to choose their topic first. The moderator reads the lead-in to the question, followed by the questions. The team has 60 seconds to answer as many of the questions as they can, and may confer; each question is worth 10 points. The opposing team has the opportunity to answer any questions the answering team misses, after which they choose their topic from the remaining two options. Lastly, the fourth quarter consists of pyramidal tossups, which are worth 30, 20, or 10 points, depending on how quickly a player provides the correct answer.
+  
+## Project Data
+
+This project analyzes thirty National History Bowl packets, each consisting of 56 to 61 questions. These sets represent two academic years: the first year available (2015-2016) and last year available (2021-2022). To glean a representative sample of each year, the first 5 packets from the C, A, and Nationals sets were chosen. B-sets were omitted due to their frequently similar difficulty level to C-sets. 
+
+Each question was copied from the PDF packet document available on the IAC website and read for OCR errors. During the transcription process, I read each question for women's names, using Google and Wikipedia to investigate unfamiliar names. I want to note that gender is a complicated, highly personal identity, and identifying women in history necessitates making many assumptions. I want to acknowledge that transgender, nonbinary, Two Spirit, and other people outside the western gender binary have always existed, whether our historical record includes them or not, and it is impossible to say whether I have correctly identified the gender of all individuals named in this data set. 
+
+Secondary to this important acknowledgement, I want to make clear my intent behind two additional metadata categories, `is_fictional` and `is_myth`. Many questions that are **about** a male author mention female characters from their works; I think it is important to differentiate between women historical figures, and fictional women. However, there are also female and feminine figures in many mythological and religious systems, who I don't feel should be categorized the same way as literary characters. For example, there are questions about several Greek and Roman goddesses; even if, say, Athena does not feel "real" to me, she did to the people who worshiped her. As such, religious and mythological figures are separated from literary characters in my metadata scheme. If a named woman is a literary figure, then `is_fictional = TRUE`, whereas if she is a mythological or religious entity, `is_myth = TRUE`. 
+
+Lastly, there is the issue of distinguishing questions which mention a woman from questions **about** a woman -- that is, questions for which the answer is a named woman. To facilitate the separation of these two categories, the field `is_answer` will have value `TRUE` when a woman is the answer to the question, but remain `FALSE` if she is merely mentioned in a question whose answer is a different historical topic. 
+  
+# Data Import and Cleaning
+
+  Although there has already been an element of human oversight of the questions -- namely, my reading the questions as I transcribed them in order to detect OCR errors and identify womens names -- some formatting elements of National History Bowl questions are easier to remove or rectify in an automated fashion. Many questions contain pronunciation guides, which aren't necessary to this analysis. Additionally, special characters are used in fourth quarter questions to identify the cut-off points between the 30-point, 20-point, and 10-point portions of the questions. As an exemplar of the complex formatting of a fourth quarter question, I provide Question 5 from Quarter 4 of Round 2 of the 2022 National Championship:
+  
+<p style="margin-left:10%; margin-right:10%;"><strong><u>This country resettled Jewish refugees from Nazi Germany in the town of Sosúa [[soh-SOO-ah]] after the Évian Conference. During one massacre in this country, the fate of the victims was determined by how they pronounced the term "perejil'' [[peh-reh-HEEL]] (+)</u> when soldiers held up a certain herb. One leader of this country had several thousands migrants from a neighboring country killed in the Parsley Massacre and was nicknamed "El (*)</strong> Jefe" [[HE-feh]]. For ten points, name this Caribbean country that was ruled for over thirty years by Rafael Trujillo [[troo-HEE-yoh]] from Santo Domingo.</p> 
+
+This question has special characters "(+)" and "(*)", as well as double-bracketed pronunciation guides, all of which are superfluous to the text necessary for my analysis. The script `data_prep.R` uses the `stringr` package to remove these additional characters, leaving just the plaintext of the questions.
+
+Additionally, the `data_prep.R` script uses data about the packets and questions to generate a unique identifier for each question and answer. This identifier is ispired by a standard museum object labeling format, which takes the form of `year.accession.box.object`. In this case, I have amended the format to be `year.set.tournament_round.quarter.question_number`. _Quarter 3 questions have an additional digit indicated which thematic lightning round option the question was part of._ 
+
+When questions and answers are written to text files, the ID number is followed by an underscore and an additional identifier: `_q` for question, `_a` for answer, `_bonus_q` for quarter 2 bonus questions, or `_bonus_a` for answers to quarter 2 bonus questions. Creating separate files for questions and answers allow them to be analyzed separately, and embedding these identifiers into the file names will allow me to easily separate questions from answers, while having a shared ID number maintains the connection between a question and its corresponding answer. 
+
+```{r setup, echo=F, message=F}
+# use tidyverse packages for data cleaning
+library(tidyverse)
+
+# use reticulate package to access python
+library(reticulate)
+
+# use knitr and kableextra to create tables
+library(knitr)
+library(kableExtra)
+
+# use virtual environment
+use_condaenv("~/Desktop/hist426/envs")
+
+```
+
+```{r data-source, message=F}
+# use data prep script as source - script available in GitHub
+source("data_prep.R")
+
+kable(nhbb_clean) %>% 
+  kableExtra::kable_material() %>% 
+  column_spec(10, width = "20em") %>% 
+  scroll_box(width = "100%", height = "300px")
+```
+
+# Statistical Analysis #1: Women's Inclusion/Exclusion
+
+Across the 1514 questions included in this study, women were answers to just 43 of them - `r 100*(43/1514)` percent. Those questions are displayed in the table below.
+
+```{r woman-qs-kable, message = F}
+### NEED TO ADD LIGHTNING LEAD-INS! 
+## Why isn't the pronunciation guide getting edited out for the Kitty Genovese question?
+
+# using first analysis script as source - script available in GitHub
+source("analysis.R")
+
+kable(woman_qs) %>% 
+  kableExtra::kable_material() %>% 
+  scroll_box(width = "100%", height = "300px")
+```
+
+```{python, include = F}
+# import spaCy
+import spacy
+
+# import pandas DataFrame packages
+import pandas as pd
+```
+
+```{python, include = F}
+nhbb_spacy=pd.read_csv("nhbb_clean.csv")
+nlp = spacy.load("en_core_web_sm")
+
+# tokenize questions
+  # define function to use nlp function on texts
+def process_text(text):
+  return nlp(text)
+  # define function to return list of tokens for each text
+def get_token(doc):
+  return [(token.text) for token in doc]
+  # define function to get part of speech for each token
+def get_pos(doc):
+  return [(token.pos_, token.tag_) for token in doc]
+
+nhbb_spacy['q_text_doc'] = nhbb_spacy['q_text_clean'].apply(process_text)
+nhbb_spacy['q_text_tokens'] = nhbb_spacy['q_text_doc'].apply(get_token)
+nhbb_spacy['q_text_pos'] = nhbb_spacy['q_text_doc'].apply(get_pos)
+```
+
+Extracting Proper Nouns
+```{python, include = F}
+def extract_prop_nouns(doc):
+  return [token.text for token in doc if token.pos_ == 'PROPN']
+
+nhbb_spacy['prop_nouns'] = nhbb_spacy['q_text_doc'].apply(extract_prop_nouns)
+```
+
+```{r, include=F}
+nhbb_spacyr <- py_to_r(py$nhbb_spacy)
+prop_nouns <- nhbb_spacyr %>% 
+  select(prop_nouns) 
+
+# count instances of each proper noun
+for (i in 1:nrow(prop_nouns)){
+  prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "c\\(")
+  prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "\\)")
+}
+
+prop_nouns_count <- prop_nouns %>% 
+  separate_longer_delim(cols = prop_nouns, delim = ",") %>%
+  group_by(prop_nouns) %>%
+  count()
+
+```
+
