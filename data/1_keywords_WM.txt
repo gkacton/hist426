@@ -1,0 +1,13 @@
+Type	POS	Headword	Rank	Freq_Tar	Freq_Ref	Range_Tar	Range_Ref	NormFreq_Tar	NormFreq_Ref	NormRange_Tar	NormRange_Ref	Keyness (Likelihood)	Keyness (Effect)
+her	None	None	1	35	4	27	4	2293.728	62.967	0.059	0.001	90.898	0.005
+queen	None	None	2	19	2	17	2	1245.167	31.484	0.037	0.001	50.049	0.002
+wife	None	None	3	23	6	22	6	1507.307	94.451	0.048	0.002	48.549	0.003
+woman	None	None	4	20	5	12	5	1310.702	78.709	0.026	0.002	42.813	0.003
+mary	None	None	5	11	0	11	0	720.886	0.000	0.024	0.000	36.120	0.001
+man	None	None	6	141	334	71	183	9240.448	5257.773	0.155	0.061	29.159	0.018
+victoria	None	None	7	10	1	10	1	655.351	15.742	0.022	0.000	26.564	0.001
+married	None	None	8	11	2	11	2	720.886	31.484	0.024	0.001	25.818	0.001
+elizabeth	None	None	9	7	0	7	0	458.746	0.000	0.015	0.000	22.984	0.001
+husband	None	None	10	6	0	6	0	393.211	0.000	0.013	0.000	19.700	0.001
+lady	None	None	10	6	0	6	0	393.211	0.000	0.013	0.000	19.700	0.001
+margaret	None	None	10	6	0	6	0	393.211	0.000	0.013	0.000	19.700	0.001

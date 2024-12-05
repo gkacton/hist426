@@ -1,0 +1,9 @@
+Collocate	Rank	Freq(Scaled)	FreqLR	FreqL	FreqR	Range	Likelihood	Effect
+he	1	3088	65	41	24	51	83.151	1.990
+wife	2	480	22	5	17	19	56.873	3.113
+son	3	464	20	4	16	16	49.478	3.024
+man	4	7632	88	55	33	68	42.339	1.122
+after	5	4848	60	44	16	49	33.581	1.224
+death	6	944	21	8	13	15	28.568	2.070
+own	7	256	10	0	10	9	22.972	2.882
+him	8	992	18	10	8	17	19.012	1.776

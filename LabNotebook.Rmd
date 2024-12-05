@@ -1,9 +1,9 @@
 ---
 title: "Lab Notebook"
 author: "Grace Acton"
-output: 
-  pdf_document:
-    highlight: tango
+output:
+  html_document:
+    df_print: paged
 ---
 ```{r load-packages}
 library(tidyverse)
@@ -30,7 +30,7 @@ Lastly, there is the issue of distinguishing questions which mention a woman fro
 Below is a data dictionary for the dataframes `nhbb`, and `nhbb_clean`
 
 ```{r data-dict}
-data_dict <- read.csv("data_dict_nhbb.csv")
+data_dict <- read.csv("data/data_dict_nhbb.csv")
 kable(data_dict) %>% 
   kable_styling(latex_options = "striped",
                 full_width = T) %>% 
@@ -59,10 +59,6 @@ library(reticulate)
 # use knitr and kableextra to create tables
 library(knitr)
 library(kableExtra)
-
-# use virtual environment
-use_condaenv("~/Desktop/hist426/envs")
-
 ```
 
 ```{r data-source, message=F}
@@ -288,58 +284,1258 @@ chisq$expected
 ```
 Once again, these two variables are likely not related. 
 
+# Using `reticulate` to access SpaCy
 
-```{python, include = F}
-# import spaCy
-# import spacy
-# 
-# # import pandas DataFrame packages
-# import pandas as pd
+The R package `reticulate` lets me run Python code blocks in this same notebook!
+
+Let's use `SpaCy` to find proper nouns and toponyms in the dataset.
+
+```{r reticulate-setup}
+library(reticulate)
+
+use_condaenv("native") # full path: /opt/anaconda3/envs/native/bin/python
+# if having issues, run reticulate::py_config() --> all lines should be referring to the virtual environment
+# if one of the reticulate::py_config() lines isn't correct, restart R and try again 
 ```
 
-```{python, include = F}
-# nhbb_spacy=pd.read_csv("nhbb_clean.csv")
-# nlp = spacy.load("en_core_web_sm")
-# 
-# # tokenize questions
-#   # define function to use nlp function on texts
-# def process_text(text):
-#   return nlp(text)
-#   # define function to return list of tokens for each text
-# def get_token(doc):
-#   return [(token.text) for token in doc]
-#   # define function to get part of speech for each token
-# def get_pos(doc):
-#   return [(token.pos_, token.tag_) for token in doc]
-# 
-# nhbb_spacy['q_text_doc'] = nhbb_spacy['q_text_clean'].apply(process_text)
-# nhbb_spacy['q_text_tokens'] = nhbb_spacy['q_text_doc'].apply(get_token)
-# nhbb_spacy['q_text_pos'] = nhbb_spacy['q_text_doc'].apply(get_pos)
-# ```
-# 
-# Extracting Proper Nouns
-# ```{python, include = F}
-# def extract_prop_nouns(doc):
-#   return [token.text for token in doc if token.pos_ == 'PROPN']
-# 
-# nhbb_spacy['prop_nouns'] = nhbb_spacy['q_text_doc'].apply(extract_prop_nouns)
+```{python py-load-packages}
+import spacy
+
+# import pandas DataFrame packages
+import pandas as pd
 ```
 
-```{r, include=F}
-# nhbb_spacyr <- py_to_r(py$nhbb_spacy)
-# prop_nouns <- nhbb_spacyr %>% 
-#   select(prop_nouns) 
+```{python load-data}
+nhbb_spacy=pd.read_csv("data/nhbb_clean.csv")
+nlp = spacy.load("en_core_web_sm")
+```
+
+```{python tokenize-qs}
+# tokenize questions
+  # define function to use nlp function on texts
+def process_text(text):
+  return nlp(text)
+  # define function to return list of tokens for each text
+def get_token(doc):
+  return [(token.text) for token in doc]
+  # define function to get part of speech for each token
+def get_pos(doc):
+  return [(token.pos_, token.tag_) for token in doc]
+```
+
+```{python get-pos}
+nhbb_spacy['q_text_doc'] = nhbb_spacy['q_text'].apply(process_text)
+nhbb_spacy['q_text_tokens'] = nhbb_spacy['q_text_doc'].apply(get_token)
+nhbb_spacy['q_text_pos'] = nhbb_spacy['q_text_doc'].apply(get_pos)
+```
+
+### Extracting Proper Nouns
+```{python prop-nouns}
+# Return only proper nouns
+def extract_prop_nouns(doc):
+  return [token.text for token in doc if token.pos_ == 'PROPN']
+
+nhbb_spacy['prop_nouns'] = nhbb_spacy['q_text_doc'].apply(extract_prop_nouns)
+```
+
+```{r py-to-r-conversion}
+nhbb_spacyr <- py_to_r(py$nhbb_spacy)
+prop_nouns <- nhbb_spacyr %>%
+  mutate(prop_nouns = as.character(prop_nouns)) %>% 
+  filter(prop_nouns != "list()")
+
+# count instances of each proper noun
+for (i in 1:nrow(prop_nouns)){
+  prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "c\\(")
+  prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "\\)")
+  prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "\"")
+  prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = " ")
+}
+
+prop_nouns_count <- prop_nouns %>%
+  separate_longer_delim(cols = prop_nouns, delim = ",") %>%
+  group_by(prop_nouns) %>%
+  count() %>% 
+  arrange(desc(n))
+
+head(prop_nouns_count)
+```
+
+```{python NER}
+# Get Named Entity labels and assign to variable "labels"
+labels = nlp.get_pipe("ner").labels
+
+# Print labels and their descriptions
+for label in labels:
+  print(label + " : " + spacy.explain(label))
+```
+```{python NER-func}
+# define function to extract named entity *types* from doc objects
+def extract_ne_tags(doc):
+  return [ent.label_ for ent in doc.ents]
+
+# Apply function to q_text_doc column and store named entity tags in new column
+nhbb_spacy["ne_tags"] = nhbb_spacy["q_text_doc"].apply(extract_ne_tags)
+```
+
+```{python extract-NEs}
+# define function to extract text tagged with named entities from from doc objects
+def extract_named_entities(doc):
+  return[ent.text for ent in doc.ents]
+
+# Apply function to q_text_doc column and store named entities in new column
+nhbb_spacy["named_entities"] = nhbb_spacy["q_text_doc"].apply(extract_named_entities)
+```
+
+```{r py-r-conversion-NER}
+nhbb_spacyr <- py_to_r(py$nhbb_spacy)
+named_entities <- nhbb_spacyr %>%
+  mutate(named_entities = as.character(named_entities)) %>% 
+  filter(named_entities != "list()")
+
+# count instances of each proper noun
+for (i in 1:nrow(named_entities)){
+  named_entities$named_entities[i] <- str_remove_all(named_entities$named_entities[i], pattern = "c\\(")
+  named_entities$named_entities[i] <- str_remove_all(named_entities$named_entities[i], pattern = "\\)")
+  named_entities$named_entities[i] <- str_remove_all(named_entities$named_entities[i], pattern = "\"")
+  named_entities$named_entities[i] <- str_trim(named_entities$named_entities[i])
+  named_entities$named_entities[i] <- str_squish(named_entities$named_entities[i])
+}
+
+
+named_entities_count <- named_entities %>%
+  separate_longer_delim(cols = named_entities, delim = ", ") %>%
+  group_by(named_entities) %>%
+  count() %>% 
+  arrange(desc(n))
+
+head(named_entities_count)
+```
+
+### Extract only place names
+
+```{python places}
+# Define function to extract words tagged as "GPE", "LOC", or "FAC"
+def extract_places(doc):
+  return[ent.text for ent in doc.ents if ent.label_ == "GPE" or ent.label == "LOC" or ent.label == "FAC"]
+
+# Apply function to nhbb_spacy DF column "q_text_doc" and save in new column
+nhbb_spacy["places"] = nhbb_spacy["q_text_doc"].apply(extract_places)
+```
+
+```{r}
+nhbb_spacyr <- py_to_r(py$nhbb_spacy)
+places <- nhbb_spacyr %>%
+  mutate(places = as.character(places)) %>% 
+  filter(places != "list()")
+
+# count instances of each proper noun
+for (i in 1:nrow(places)){
+  places$places[i] <- str_remove_all(places$places[i], pattern = "c\\(")
+  places$places[i] <- str_remove_all(places$places[i], pattern = "\\)")
+  places$places[i] <- str_remove_all(places$places[i], pattern = "\"")
+}
+
+places_count <- places %>%
+  separate_longer_delim(cols = places, delim = ", ") %>%
+  group_by(places) %>%
+  count() %>% 
+  arrange(desc(n))
+
+head(places_count)
+```
+
+# Use `leaflet` to make a map of named places
+
+```{r load-leaflet}
+library(leaflet)
+library(tidygeocoder)
+library(basemaps)
+```
+
+```{r spatial-df}
+# nhbb_places <- places %>% 
+#   select(ID, places) %>% 
+#   separate_longer_delim(cols = places, delim = ", ") %>% 
+#   geocode(places, method = "osm", lat = lattitude, long = longitude)
+```
+
+```{r leaflet-1}
+# nhbb_geo <- read.csv("nhbb_places_geocoded.csv") 
+# nhbb_geo <- nhbb_geo %>% 
+#   select(-ID, -X)
 # 
-# # count instances of each proper noun
-# for (i in 1:nrow(prop_nouns)){
-#   prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "c\\(")
-#   prop_nouns$prop_nouns[i] <- str_remove_all(prop_nouns$prop_nouns[i], pattern = "\\)")
-# }
+# nhbb_places_counts <- left_join(x = places_count, y = nhbb_geo, by = c("places"))
 # 
-# prop_nouns_count <- prop_nouns %>% 
-#   separate_longer_delim(cols = prop_nouns, delim = ",") %>%
-#   group_by(prop_nouns) %>%
-#   count()
+# nhbb_places_counts <- nhbb_places_counts %>% 
+#   distinct()
+# 
+# nhbb_places_counts$lattitude[1:2] <- 39.833
+# nhbb_places_counts$longitude[1:2] <- -98.583
+# 
+# map <- leaflet() %>% 
+#   addProviderTiles("Stadia.StamenTonerLite") %>% 
+#   addCircleMarkers(data = nhbb_places_counts,
+#              lng = ~longitude,
+#              lat = ~lattitude,
+#              popup = ~places,
+#              radius = ~n)
+```
+
+This map reveals a **huge** number of geocoding mistakes -- "DC" and "Armenia" have both ended up in Colombia...
+Next I should try using historical gazetteers to geocode rather than modern geocoding tools! 
+I can also use either the Getty TGN or another similar dataset to categorize the places mentioned into continental groupings. 
+
+```{r gg-map}
+# library(maps)
+# 
+# world <- map_data("world")
+# 
+# ggplot() +
+#   geom_polygon(data = world, aes(long, lat, group = group),
+#                color = "black",
+#                fill = "lightgray") +
+#   geom_point(data = nhbb_places, aes(longitude, lattitude,
+#                               color = "red"))
+```
+# After OpenRefining
+
+I used OpenRefine's data reconcilliation capability to reconcile place names identified by SpaCy against the Getty Thesaurus of Geographic Names. The hierarchical structure of the Getty TGN let me identify places at the country and continent level, which lets me analyze the geographical spread of the questions more reliably than geocoding individual points. This first round of analysis is only with one toponym per question, I will be going back to OpenRefine to reconcile the remaining toponyms later. 
+
+First, I want to look at what questions are **mentioned in the questions themselves**. In this analysis, I count places categorized by Getty as "primary political entities" and "former primary political entities". 
+
+```{r nhbb-countries-2}
+nhbb_countries_qs <- read.csv("data/NHBB_countries_2.csv")
+
+country_counts_qs <- nhbb_countries_qs %>% 
+  group_by(q_place_1) %>% 
+  count() %>% 
+  arrange(desc(n))
+
+head(country_counts_qs)
+```
+
+Now, I want to look at the countries that **contain the more specific entities mentioned in questions.** I will again use the same Getty place categories, but this time with the container countries.  
+
+```{r country-container-counts}
+country_containers <- read.csv("data/nhbb_container_countries.csv")
+
+country_counts_containers <- country_containers %>% 
+  group_by(parent_hierarchy1) %>% 
+  count() %>% 
+  arrange(desc(n))
+
+head(country_counts_containers)
+```
+Because the parent hierarchy for a country won't also contain that country, I can add these to get the total number of instances of each country appearing in a question.
+
+```{r add-counts}
+all_countries <- full_join(country_counts_qs, country_counts_containers, by = c("q_place_1" = "parent_hierarchy1")) %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(n.total = rowSums(across(where(is.numeric)))) %>% 
+  select(q_place_1, n.total) %>% 
+  arrange(desc(n.total))
+
+head(all_countries)
 
 ```
+I'll also count how prevalent each continent is.
+
+```{r continents}
+nhbb_continents <- read.csv("data/NHBB_continents.csv")
+
+continent_counts <- nhbb_continents %>% 
+  group_by(parent_hierarchy1) %>% 
+  count() %>% 
+  arrange(desc(n))
+
+total_n_continent <- sum(continent_counts$n)
+
+continent_counts <- continent_counts %>% 
+  mutate(percent = round(100*n/total_n_continent, digits=2))
+
+head(continent_counts)
+```
+Wow, only 5% of questions include a place in Africa, 1.8% in South America, and less than one percent in Oceania. 
+
+For the record, of the 284 questions mentioning places in North and Central America, `r 100*all_countries$n.total[1]/continent_counts$n[1]`% are in the United States. 
+
+# Dealing with the reconciled data at a larger scale
+
+OpenRefine was great for reconciling with the Getty vocabularies. BUT, its multi-row record format doesn't really gel with the tidy data format I need for analysis! I've ended up with a 10,000+ row table, which needs to get reduced down to the same number of rows as in my question manifest, which is `r nrow(nhbb_clean)`.
+
+```{r tidy-openrefine}
+openrefine <- read.csv("data/nhbb_places_ALL.csv")
+```
+
+This table is a hot mess. I did edit it so that every row has a question ID, which will let me merge all of the data by question. But first, I need to separate out each geographical column and its `type` identifying column, pair the toponym with its most relevant type, and then merge them back together. 
+
+I want to keep track of the following types: 
+- Cities
+- Empires
+- Primary political entities (countries), both current and former
+- Continents 
+- Geographic regions (ex: West Africa)
+- Ancient sites/ruins 
+
+It is **very** unlikely that any individual toponym will be included in **all** of these categories, which makes the analysis more straightforward!
+
+In just the first column of this dataset, we have:
+```{r unique-types}
+unique(openrefine$q_place_type_1)
+```
+
+So, I will define a list of `keeps`:
+
+```{r keep-types}
+keeps <- c("cities", 
+           "primary political entities",
+           "former primary political entities",
+           "continents",
+           "regions (geographic)",
+           "ancient sites",
+           "empires (sovreign states)")
+```
+
+I am calling this first subset `top_1`, short for "toponym #1". 
+
+```{r tidy-columns}
+top_1 <- openrefine %>% 
+  select(ID, q_place_1, q_place_type_1) %>% 
+  filter(q_place_type_1 != "")
+
+# copy place name to all rows for the same ID
+for(i in 1:nrow(top_1)){
+  if(i == 1){
+  } else if(top_1$ID[i] == top_1$ID[i-1]){
+    top_1$q_place_1[i] <- top_1$q_place_1[i-1]
+  }
+}
+
+# filter to only include places of types in the keeps list
+top_1 <- top_1 %>% 
+  filter(q_place_type_1 %in% keeps == TRUE)
+```
+
+There are a few places that are still being recognized in more than one category. There should be `r length(unique(top_1$ID))` rows, but there are currently `r nrow(top_1)` rows in the data frame. I need for there to be **one place per question**, otherwise the counts will be skewed. 
+
+One of the repeats that is happening is China -- it is considered both a current AND former primary political entity. I only want each instance of China to count once, so I will remove the "former primary political entity" entry from the `type` column for each instance of China. Likewise, Athens and San Lorenzo are counted as both citues and ancient sites; I am choosing to keep these as cities, because there are other cities in the dataset that could be considered in both of these categories but are currently only counted as "cities". 
+
+```{r filter-repeats}
+for(i in 1:nrow(top_1)){
+  if(top_1$q_place_1[i] == "China" & top_1$q_place_type_1[i] == "former primary political entities"){
+    top_1$q_place_type_1[i] <- ""
+  } else if(top_1$q_place_1[i] == "Athens" & top_1$q_place_type_1[i] == "ancient sites" | top_1$q_place_1[i] == "San Lorenzo" & top_1$q_place_type_1[i] == "ancient sites"){
+    top_1$q_place_type_1[i] <- ""
+  }
+}
+
+top_1 <- top_1 %>% 
+  filter(q_place_type_1 != "")
+```
+
+Now, there are exactly the same number of rows in the data frame as there are unique ID values, meaning each ID has only one place name in the `top_1` column. 
+
+Next, I need to repeat this with the next column of toponyms, which I will call `top_2`.
+
+```{r top-2-processing}
+top_2 <- openrefine %>% 
+  select(ID, q_place_2, q_place_type_2) %>% 
+  filter(q_place_type_2 != "")
+
+# copy place name to all rows for the same ID
+for(i in 1:nrow(top_2)){
+  if(i == 1){
+  } else if(top_2$ID[i] == top_2$ID[i-1]){
+    top_2$q_place_2[i] <- top_2$q_place_2[i-1]
+  }
+}
+
+# filter to only include places of types in the keeps list
+top_2 <- top_2 %>% 
+  filter(q_place_type_2 %in% keeps == TRUE)
+
+for(i in 1:nrow(top_2)){
+  if(top_2$q_place_2[i] == "China" & top_2$q_place_type_2[i] == "former primary political entities" |
+     top_2$q_place_2[i] == "Cambodia" & top_2$q_place_type_2[i] == "former primary political entities"){
+    top_2$q_place_type_2[i] <- ""
+  } else if(top_2$q_place_2[i] == "Athens" & top_2$q_place_type_2[i] == "ancient sites" | 
+            top_2$q_place_2[i] == "San Lorenzo" & top_2$q_place_type_2[i] == "ancient sites" |
+            top_2$q_place_2[i] == "Canterbury" & top_2$q_place_type_2[i] == "ancient sites"){
+    top_2$q_place_type_2[i] <- ""
+  }
+}
+
+top_2 <- top_2 %>% 
+  filter(q_place_type_2 != "")
+```
+
+This set had additional repeat errors -- Cambodia has the same issue as China (counts as both current and former primary political entity) and Canterbury has the same issue as Athens. I've added corrections for there errors in the for-loop above. 
+
+The final column of place names is slightly more complicated, as some question IDs have more than one distinct place name in this column. This time, I will need to determine if there are place names that repeat within the ID, rather than seeing if an ID repeats across the entire set. 
+
+```{r top-3-processing}
+top_3 <- openrefine %>% 
+  select(ID, q_place_3plus, q_place_type_3) %>% 
+  filter(q_place_type_3 != "")
+
+# copy place name to all rows for the same ID
+for(i in 1:nrow(top_3)){
+  if(i == 1){
+  } else if(top_3$ID[i] == top_3$ID[i-1] & top_3$q_place_3plus[i] == ""){
+    top_3$q_place_3plus[i] <- top_3$q_place_3plus[i-1]
+  }
+}
+
+# filter to only include places of types in the keeps list
+top_3 <- top_3 %>% 
+  filter(q_place_type_3 %in% keeps == TRUE)
+
+for(i in 1:nrow(top_3)){
+  if(top_3$q_place_3plus[i] == "China" & top_3$q_place_type_3[i] == "former primary political entities" |
+     top_3$q_place_3plus[i] == "Cambodia" & top_3$q_place_type_3[i] == "former primary political entities"){
+    top_3$q_place_type_3[i] <- ""
+  } else if(top_3$q_place_3plus[i] == "Athens" & top_3$q_place_type_3[i] == "ancient sites" | 
+            top_3$q_place_3plus[i] == "San Lorenzo" & top_3$q_place_type_3[i] == "ancient sites" |
+            top_3$q_place_3plus[i] == "Canterbury" & top_3$q_place_type_3[i] == "ancient sites"){
+    top_3$q_place_type_3[i] <- ""
+  }
+}
+
+top_3 <- top_3 %>% 
+  filter(q_place_type_3 != "") %>% 
+  filter(q_place_3plus != "") 
+``` 
+
+In total, `r sum(nrow(top_1), nrow(top_2), nrow(top_3))` places named in tossup questions in this set are cities, nations, regions, continents, etc., as determine by SpaCy's named entity recognition and my minimal editing to remove non-place names. I am absoulutely sure that there are places missing, and a future analysis of these questions would benefit from manually compiling place names. 
+
+```{r compile-places}
+top_1 <- top_1 %>% 
+  mutate(tops = q_place_1,
+         types = q_place_type_1) %>% 
+  select(ID, tops, types) 
+top_2 <- top_2 %>% 
+  mutate(tops = q_place_2,
+         types = q_place_type_2) %>% 
+  select(ID, tops, types) 
+top_3 <- top_3 %>% 
+  mutate(tops = q_place_3plus,
+         types = q_place_type_3) %>% 
+  select(ID, tops, types) 
+
+tops <- rbind(top_1, top_2, top_3)
+```
+
+## Actually, I want to keep ALL named places that I've reconciled! 
+
+I should go back and clean the data to include ALL place names, not just those in my desired categories, to determine the total number of named places in tossup questions. 
+
+```{r all-places}
+places_1 <- openrefine %>% 
+  select(ID, q_place_1, q_place_type_1) %>% 
+  filter(q_place_1 != "") %>% 
+  distinct(ID, q_place_1, q_place_type_1) %>% 
+  mutate(place = q_place_1,
+         place_type = q_place_type_1) %>% 
+  select(-q_place_1,
+         -q_place_type_1) %>% 
+  mutate(place_ID = paste(ID, place, sep="_"))
+
+places_2 <- openrefine %>% 
+  select(ID, q_place_2, q_place_type_2) %>% 
+  filter(q_place_2 != "") %>% 
+  distinct(ID, q_place_2, q_place_type_2) %>% 
+  mutate(place = q_place_2,
+         place_type = q_place_type_2) %>% 
+  select(-q_place_2,
+         -q_place_type_2) %>% 
+  mutate(place_ID = paste(ID, place, sep="_"))
+
+places_3 <- openrefine %>% 
+  select(ID, q_place_3plus, q_place_type_3) %>% 
+  filter(q_place_3plus != "") %>% 
+  distinct(ID, q_place_3plus, q_place_type_3) %>% 
+  mutate(place = q_place_3plus,
+         place_type = q_place_type_3) %>% 
+  select(-q_place_3plus,
+         -q_place_type_3) %>% 
+  mutate(place_ID = paste(ID, place, sep="_"))
+
+all_places <- rbind(places_1, places_2, places_3)
+```
+
+The `all_places` dataframe contains all places named in tossup questions, as recognized by SpaCy **and** the Getty Vocabularies. 
+
+## Counting countries
+
+Now, I need to do the same type of cleaning for the Parent Hierarchy columns of the dataframe. These will be more similar to the `top_3` process, in which there are multiple values per question ID, because most place names will have at least 2 containing entities (for example, a country and then a continent). 
+
+In OpenRefine, I only reconciled country and continent values for parent hierarchy. So, in this filtering and cleaning, I only want to keep countries and continents, so I will define a new `container_keeps` list to select my desired location types.
+
+```{r container-keeps}
+container_keeps <- c("primary political entities",
+                     "former primary political entities",
+                     "continents")
+```
+
+```{r hierarchy-cleaning-1}
+parent_1 <- openrefine %>% 
+  select(ID, q_place_1, parent_hierarchy_1, hierarchy_types_1) %>% 
+  filter(q_place_1 != "" |
+           parent_hierarchy_1 != "" |
+           hierarchy_types_1 != "")
+
+# copy PARENT HIERARCHY place name to all rows for the same ID
+for(i in 1:nrow(parent_1)){
+  if(i == 1){
+  } else if(parent_1$ID[i] == parent_1$ID[i-1] & parent_1$parent_hierarchy_1[i] == ""){
+    parent_1$parent_hierarchy_1[i] <- parent_1$parent_hierarchy_1[i-1]
+  }
+}
+
+# now copy PLACE named in question to all rows for the same ID
+for(i in 1:nrow(parent_1)){
+  if(i == 1){
+  } else if(parent_1$ID[i] == parent_1$ID[i-1] & parent_1$q_place_1[i] == ""){
+    parent_1$q_place_1[i] <- parent_1$q_place_1[i-1]
+  }
+}
+
+# filter to only include places of types in the keeps list
+parent_1 <- parent_1 %>% 
+  filter(hierarchy_types_1 %in% container_keeps == TRUE)
+
+# correct China/Cambodia error
+for(i in 1:nrow(parent_1)){
+  if(parent_1$parent_hierarchy_1[i] == "China" & parent_1$hierarchy_types_1[i] == "former primary political entities" |
+     parent_1$parent_hierarchy_1[i] == "Cambodia" & parent_1$hierarchy_types_1[i] == "former primary political entities"){
+    parent_1$hierarchy_types_1[i] <- ""
+  } 
+}
+
+# remove blanks and duplicate rows 
+parent_1 <- parent_1 %>% 
+  filter(hierarchy_types_1 != "") %>% 
+  filter(parent_hierarchy_1 != "") %>% 
+  distinct(ID, q_place_1, parent_hierarchy_1, hierarchy_types_1)
+
+# join with places --> use "ID" AND "places" as the joining column
+  # create mutated column pasting ID and place into a single identifier 
+parent_1 <- parent_1 %>% 
+  mutate(place_ID = paste(ID, q_place_1, sep="_"))
+
+# now join the two dfs by the place_ID
+full_places_1 <- right_join(places_1, parent_1, by = c("place_ID")) %>% 
+  mutate(parent_hierarchy = parent_hierarchy_1) %>% 
+  mutate(parent_type = hierarchy_types_1) %>% 
+  mutate(ID = ID.x) %>% 
+  select(-parent_hierarchy_1, 
+         -hierarchy_types_1,
+         -q_place_1,
+         -ID.y,
+         -ID.x) %>% 
+  select(ID,
+         place_ID,
+         place,
+         place_type,
+         parent_hierarchy,
+         parent_type)
+ 
+```
+
+Now, I'll repeat the process with the second set of parent hierarchy values, and join with the second set of `places`. 
+
+```{r hierarchy-cleaning-2}
+parent_2 <- openrefine %>% 
+  select(ID, q_place_2, parent_hierarchy_2, hierarchy_types_2) %>% 
+  filter(q_place_2 != "" |
+           parent_hierarchy_2 != "" |
+           hierarchy_types_2 != "")
+
+# copy PARENT HIERARCHY place name to all rows for the same ID
+for(i in 1:nrow(parent_2)){
+  if(i == 1){
+  } else if(parent_2$ID[i] == parent_2$ID[i-1] & parent_2$parent_hierarchy_2[i] == ""){
+    parent_2$parent_hierarchy_2[i] <- parent_2$parent_hierarchy_2[i-1]
+  }
+}
+
+# now copy PLACE named in question to all rows for the same ID
+for(i in 1:nrow(parent_2)){
+  if(i == 1){
+  } else if(parent_2$ID[i] == parent_2$ID[i-1] & parent_2$q_place_2[i] == ""){
+    parent_2$q_place_2[i] <- parent_2$q_place_2[i-1]
+  }
+}
+
+# filter to only include places of types in the keeps list
+parent_2 <- parent_2 %>% 
+  filter(hierarchy_types_2 %in% container_keeps == TRUE)
+
+# correct China/Cambodia error
+for(i in 1:nrow(parent_2)){
+  if(parent_2$parent_hierarchy_2[i] == "China" & parent_2$hierarchy_types_2[i] == "former primary political entities" |
+     parent_2$parent_hierarchy_2[i] == "Cambodia" & parent_2$hierarchy_types_2[i] == "former primary political entities"){
+    parent_2$hierarchy_types_2[i] <- ""
+  } 
+}
+
+# remove blanks and duplicate rows 
+parent_2 <- parent_2 %>% 
+  filter(hierarchy_types_2 != "") %>% 
+  filter(parent_hierarchy_2 != "") %>% 
+  distinct(ID, q_place_2, parent_hierarchy_2, hierarchy_types_2)
+
+# join with places --> use "ID" AND "places" as the joining column
+  # create mutated column pasting ID and place into a single identifier 
+parent_2 <- parent_2 %>% 
+  mutate(place_ID = paste(ID, q_place_2, sep="_"))
+
+# now join the two dfs by the place_ID
+full_places_2 <- right_join(places_2, parent_2, by = c("place_ID")) %>% 
+  mutate(parent_hierarchy = parent_hierarchy_2) %>% 
+  mutate(parent_type = hierarchy_types_2) %>% 
+  mutate(ID = ID.x) %>% 
+  select(-parent_hierarchy_2, 
+         -hierarchy_types_2,
+         -q_place_2,
+         -ID.y,
+         -ID.x) %>% 
+  select(ID,
+         place_ID,
+         place,
+         place_type,
+         parent_hierarchy,
+         parent_type)
+```
+
+And now the final set of hierarchy values.
+
+```{r hierarchy-cleaning-3}
+parent_3 <- openrefine %>% 
+  select(ID, q_place_3plus, parent_hierarchy_3, hierarchy_types_3) %>% 
+  mutate(q_place_3 = q_place_3plus) %>% 
+  select(-q_place_3plus) %>% 
+  filter(q_place_3 != "" |
+           parent_hierarchy_3 != "" |
+           hierarchy_types_3 != "")
+
+# copy PARENT HIERARCHY place name to all rows for the same ID
+for(i in 1:nrow(parent_3)){
+  if(i == 1){
+  } else if(parent_3$ID[i] == parent_3$ID[i-1] & parent_3$parent_hierarchy_3[i] == ""){
+    parent_3$parent_hierarchy_3[i] <- parent_3$parent_hierarchy_3[i-1]
+  }
+}
+
+# now copy PLACE named in question to all rows for the same ID
+for(i in 1:nrow(parent_3)){
+  if(i == 1){
+  } else if(parent_3$ID[i] == parent_3$ID[i-1] & parent_3$q_place_3[i] == ""){
+    parent_3$q_place_3[i] <- parent_3$q_place_3[i-1]
+  }
+}
+
+# filter to only include places of types in the keeps list
+parent_3 <- parent_3 %>% 
+  filter(hierarchy_types_3 %in% container_keeps == TRUE)
+
+# correct China/Cambodia error
+for(i in 1:nrow(parent_3)){
+  if(parent_3$parent_hierarchy_3[i] == "China" & parent_3$hierarchy_types_3[i] == "former primary political entities" |
+     parent_3$parent_hierarchy_3[i] == "Cambodia" & parent_3$hierarchy_types_3[i] == "former primary political entities"){
+    parent_3$hierarchy_types_3[i] <- ""
+  } 
+}
+
+# remove blanks and duplicate rows 
+parent_3 <- parent_3 %>% 
+  filter(hierarchy_types_3 != "") %>% 
+  filter(parent_hierarchy_3 != "") %>% 
+  distinct(ID, q_place_3, parent_hierarchy_3, hierarchy_types_3)
+
+# join with places --> use "ID" AND "places" as the joining column
+  # create mutated column pasting ID and place into a single identifier 
+parent_3 <- parent_3 %>% 
+  mutate(place_ID = paste(ID, q_place_3, sep="_"))
+
+# now join the two dfs by the place_ID
+full_places_3 <- right_join(places_3, parent_3, by = c("place_ID")) %>% 
+  mutate(parent_hierarchy = parent_hierarchy_3) %>% 
+  mutate(parent_type = hierarchy_types_3) %>% 
+  mutate(ID = ID.x) %>% 
+  select(-parent_hierarchy_3, 
+         -hierarchy_types_3,
+         -q_place_3,
+         -ID.y,
+         -ID.x) %>% 
+  select(ID,
+         place_ID,
+         place,
+         place_type,
+         parent_hierarchy,
+         parent_type)
+```
+
+Now, I'll row bind all of these to make a single data frame with every place and its associated hierarchy. 
+
+```{r compile-places-df}
+full_place_data <- rbind(full_places_1,
+                         full_places_2,
+                         full_places_3)
+```
+
+# Analyzing Countries + Continents
+
+## Countries
+Even though I've literally just finished putting together this data frame, I need to split it again. I want to count how many times each country appears as a named place in a question, but also how many times each country is the containing hierarchy for places in questions. This will give me a more accurate picture of the geographical spread by country.
+
+```{r country-counts-1}
+# define list of entity types that count as "countries"
+country_types <- c("primary political entities",
+           "former primary political entities")
+# first count countries **mentioned in questions**
+country_counts_1 <- full_place_data %>% 
+  select(place_ID, place, place_type) %>% 
+  filter(place_type %in% country_types == TRUE) %>% 
+  distinct(place_ID, place, place_type) %>% # remove repeat rows 
+  group_by(place) %>% 
+  summarize(country_count = n())
+
+# now count countries that **contain the places mentioned in questions**
+country_counts_2 <- full_place_data %>% 
+  select(place_ID, parent_hierarchy, parent_type) %>% 
+  filter(parent_type %in% country_types == TRUE) %>% 
+  distinct(place_ID, parent_hierarchy, parent_type) %>% # remove repeat rows 
+  group_by(parent_hierarchy) %>% 
+  summarize(country_count = n())
+
+# now join the two and sum across rows 
+country_counts <- full_join(country_counts_1,
+                            country_counts_2,
+                            by = c("place" = "parent_hierarchy")) %>% 
+  mutate_all(~replace(., is.na(.), 0)) %>% 
+  mutate(total = rowSums(across(where(is.numeric)))) %>% 
+  select(place, total) %>% 
+  arrange(desc(total))
+```
+
+Of the places named in questions, `r round(100*country_counts$total[1]/sum(country_counts$total), digits = 2)`% are in the United States. 
+
+## Continents
+Now I'll repeat the analysis, but group by continent instead of country
+```{r continent-counts}
+# define list of entity types that count as "countries"
+cont_types <- c("continents")
+# first count continents **mentioned in questions**
+cont_counts_1 <- full_place_data %>% 
+  select(place_ID, place, place_type) %>% 
+  filter(place_type %in% cont_types == TRUE) %>%
+  distinct(place_ID, place, place_type) %>% # remove repeat rows 
+  group_by(place) %>% 
+  summarize(cont_count = n())
+
+# now count continents that **contain the places mentioned in questions**
+cont_counts_2 <- full_place_data %>% 
+  select(place_ID, parent_hierarchy, parent_type) %>% 
+  filter(parent_type %in% cont_types == TRUE) %>% 
+  distinct(place_ID, parent_hierarchy, parent_type) %>% # remove repeat rows 
+  group_by(parent_hierarchy) %>% 
+  summarize(cont_count = n())
+
+# now join the two and sum across rows 
+cont_counts <- full_join(cont_counts_1,
+                            cont_counts_2,
+                            by = c("place" = "parent_hierarchy")) %>% 
+  mutate_all(~replace(., is.na(.), 0)) %>% 
+  mutate(total = rowSums(across(where(is.numeric)))) %>% 
+  select(place, total) %>% 
+  arrange(desc(total))
+```
+
+## Plotting distributions
+
+```{r continent-bar}
+ggplot(cont_counts) +
+  geom_col(aes(x = fct_rev(fct_reorder(place, total)),
+               y = total))
+```
+
+I want to do a graph that colors each country according to its continent, but I need to join continent values in to the country counts dataframe to do this.
+
+```{r get-continents}
+country_cont_pair <- full_place_data %>% 
+  select(place, place_type, parent_hierarchy, parent_type) %>% 
+  filter(place_type %in% country_types == T &
+           parent_type %in% cont_types) %>% 
+  distinct(place, parent_hierarchy) %>% 
+  mutate(country = place) %>% 
+  mutate(continent = parent_hierarchy) %>% 
+  select(country, continent)
+
+parent_hierarchies_sep <- full_place_data %>% 
+  select(place_ID, parent_hierarchy, parent_type) 
+
+# ok this is super wrong, gotta fix this 
+# pseuocode:
+# for every row in the df:
+# 1. grab the place ID
+# 2. take the country for that ID and put it in the country column (might be from place or parent)
+# 3. take the continent for that ID and put it in the continent column (there are no continents named in questions)
+
+df <- full_place_data %>% 
+  filter(place_type != "") # this is too long of a variable name to keep writing out!! 
+cc <- as.data.frame(matrix(ncol = 2, nrow = nrow(df)))
+colnames(cc) <- c("country", "continent")
+for(i in 1:nrow(df)){
+  ID <- df$place_ID[i]
+  # work through *place* column to find countries
+  for(j in 1:nrow(df)){
+    if(df$place_ID[j] == ID & df$place_type[j] == "primary political entities"){
+      cc$country[i] <- df$place[j]
+      cc$continent[i] <- df$parent_hierarchy[j]
+    } else if(df$place_ID[j] == ID & df$place_type[j] == "former primary political entities" & df$parent_type[j] == "continent") {
+      cc$country[i] <- df$place[j]
+      cc$continent[i] <- df$parent_hierarchy[j]
+    }
+  }
+  # work through *parent_hierarchy* column to find countries
+  for(k in 1:nrow(df)){
+    if(df$place_ID[k] == ID & df$parent_type[k] == "primary political entities" |
+       df$place_ID[k] == ID & df$parent_type[k] == "former primary political entities"){
+      cc$country[i] <- df$parent_hierarchy[k]
+    if(df$parent_type[k+1] == "continent"){
+      cc$continent[i] <- df$parent_hierarchy[k+1]
+    } else if (df$parent_type[k+1] != "continent"){
+        ""
+      }
+    } 
+  }
+  # manually fix some errors/NAs
+ if(df$place[i] == "Holy Roman Empire" |
+    df$parent_hierarchy[i] == "Holy Roman Empire"){
+   cc$country[i] <- "Holy Roman Empire"
+   cc$continent[i] <- "Europe"
+ } else if(df$place[i] == "Soviet Union" |
+    df$parent_hierarchy[i] == "Soviet Union"){
+   cc$country[i] <- "Soviet Union"
+   cc$continent[i] <- "Asia"
+} else if(df$place[i] == "German Empire" |
+    df$parent_hierarchy[i] == "German Empire"){
+  cc$country[i] <- "Germann Empire"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Prussia" |
+    df$parent_hierarchy[i] == "Prussia"){
+  cc$country[i] <- "Prussia"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Czech Republic" |
+    df$parent_hierarchy[i] == "Czech Republic"){
+  cc$country[i] <- "Czech Republic"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Saudi Arabia" |
+    df$parent_hierarchy[i] == "Saudi Arabia"){
+  cc$country[i] <- "Saudi Arabia"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Switzerland" |
+    df$parent_hierarchy[i] == "Switzerland"){
+  cc$country[i] <- "Switzerland"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Syria" |
+    df$parent_hierarchy[i] == "Syria"){
+  cc$country[i] <- "Syria"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Hapsburg Empire" |
+    df$parent_hierarchy[i] == "Hapsburg Empire"){
+  cc$country[i] <- "Hapsburg Empire"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Lydia" |
+    df$parent_hierarchy[i] == "Lydia"){
+  cc$country[i] <- "Lydia"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Kenya" |
+    df$parent_hierarchy[i] == "Kenya"){
+  cc$country[i] <- "Kenya"
+  cc$continent[i] <- "Africa"
+} else if(df$place[i] == "Roman Empire" |
+    df$parent_hierarchy[i] == "Roman Empire"){
+  cc$country[i] <- "Roman Empire"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Tunisia" |
+    df$parent_hierarchy[i] == "Tunisia"){
+  cc$country[i] <- "Tunisia"
+  cc$continent[i] <- "Africa"
+} else if(df$place[i] == "Uzbekistan" |
+    df$parent_hierarchy[i] == "Uzbekistan"){
+  cc$country[i] <- "Uzbekistan"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Austria-Hungary" |
+    df$parent_hierarchy[i] == "Austria-Hungary"){
+  cc$country[i] <- "Austria-Hungary"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Aztec Empire" |
+    df$parent_hierarchy[i] == "Aztec Empire"){
+  cc$country[i] <- "Aztec Empire"
+  cc$continent[i] <- "South America"
+} else if(df$place[i] == "Bithynia" |
+    df$parent_hierarchy[i] == "Bithynia"){
+  cc$country[i] <- "Bithynia"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "German Democratic Republic" |
+    df$parent_hierarchy[i] == "German Democratic Republic"){
+  cc$country[i] <- "German Democratic Republic"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Khmer (Empire)" |
+    df$parent_hierarchy[i] == "Khmer (Empire)"){
+  cc$country[i] <- "Khmer (Empire)"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Korea" |
+    df$parent_hierarchy[i] == "Korea"){
+  cc$country[i] <- "Korea"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Mali Empire" |
+    df$parent_hierarchy[i] == "Mali Empire"){
+  cc$country[i] <- "Mali Empire"
+  cc$continent[i] <- "Africa"
+} else if(df$place[i] == "Matapa" |
+    df$parent_hierarchy[i] == "Matapa"){
+  cc$country[i] <- "Matapa"
+  cc$continent[i] <- "Africa"
+} else if(df$place[i] == "Numidia" |
+    df$parent_hierarchy[i] == "Numidia"){
+  cc$country[i] <- "Numidia"
+  cc$continent[i] <- "Africa"
+} else if(df$place[i] == "Republic of China" |
+    df$parent_hierarchy[i] == "Republic of China"){
+  cc$country[i] <- "Republic of China"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "West Germany" |
+    df$parent_hierarchy[i] == "West Germany"){
+  cc$country[i] <- "West Germany"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Yugoslavia" |
+    df$parent_hierarchy[i] == "Yugoslavia"){
+  cc$country[i] <- "Yugoslavia"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "Afghanistan" |
+    df$parent_hierarchy[i] == "Afghanistan"){
+  cc$country[i] <- "Afghanistan"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Belarus" |
+    df$parent_hierarchy[i] == "Belarus"){
+  cc$country[i] <- "Belarus"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "China (historical)" |
+    df$parent_hierarchy[i] == "China (historical)"){
+  cc$country[i] <- "China (historical)"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Côte d'Ivoire" |
+    df$parent_hierarchy[i] == "Côte d'Ivoire"){
+  cc$country[i] <- "Côte d'Ivoire"
+  cc$continent[i] <- "Africa"
+} else if(df$place[i] == "Malaysia" |
+    df$parent_hierarchy[i] == "Malaysia"){
+  cc$country[i] <- "Malaysia"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Slovakia" |
+    df$parent_hierarchy[i] == "Slovakia"){
+  cc$country[i] <- "Slovakia"
+  cc$continent[i] <- "Europe"
+} else if(df$place[i] == "South Georgia and South Sandwich Islands" |
+    df$parent_hierarchy[i] == "South Georgia and South Sandwich Islands"){
+  cc$country[i] <- "South Georgia and South Sandwich Islands"
+  cc$continent[i] <- "South America"
+} else if(df$place[i] == "Tajikistan" |
+    df$parent_hierarchy[i] == "Tajikistan"){
+  cc$country[i] <- "Tajikistan"
+  cc$continent[i] <- "Asia"
+} else if(df$place[i] == "Western Sahara" |
+    df$parent_hierarchy[i] == "Western Sahara"){
+  cc$country[i] <- "Western Sahara"
+  cc$continent[i] <- "Africa"
+} 
+}
+
+# remove duplicates
+cc <- cc %>% 
+  distinct(country, continent) %>% 
+  filter(is.na(continent) == FALSE)
+
+country_cont_counts <- as.data.frame(left_join(country_counts, cc, by = c("place" = "country"))) %>% 
+  arrange(desc(total))
+
+# manually add continents for German Empire, Austria-Hungary, China (historical)
+country_cont_counts$continent[34] <- "Europe"
+country_cont_counts$continent[82] <- "Europe"
+country_cont_counts$continent[123] <- "Asia"
+
+```
+
+# Plot frequencies of countries, colored by continent
+```{r country-plot-colors}
+ggplot(country_cont_counts) +
+  geom_col(aes(x = fct_rev(fct_reorder(place, total)),
+               y = total,
+               fill = continent))
+```
+
+# Isolating questions that mention women for use in AntConc
+
+I have one folder that contains text files for every question and answer in the set. However, I want to be able to use AntConc to compare questions that mention women, questions that are **about** women, and questions that ignore women. So, I need a folder of text files for each of these categories. I'll use the same for-loop as I did to write the text files originally, but use `if` statements to restrict which questions are written to files. 
+
+```{r category-txt-files}
+woman_mentioned <- woman_named_df$ID
+woman_topic <- woman_qs$ID
+
+nhbb_fresh <- nhbb_clean 
+
+for(i in 1:nrow(nhbb_fresh)){
+  if(nhbb_fresh$ID[i] %in% woman_mentioned == T){
+      q_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
+      nhbb_fresh$q_file[i] <- q_filepath
+      a_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
+      nhbb_fresh$a_file[i] <- a_filepath
+      writeLines(nhbb_fresh$q_text[i], q_filepath)
+      writeLines(nhbb_fresh$a_text[i], a_filepath)
+  # write additional files for bonus questions + answers
+    if(nhbb_fresh$bonus_q_text[i] != ""){
+      bonus_q_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
+      nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
+      bonus_a_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
+      nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
+      writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
+      writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
+    } else if(nhbb_fresh$bonus_q_text[i] == ""){
+      nhbb_fresh$bonus_q_file[i] <- NA
+      nhbb_fresh$bonus_a_file[i] <- NA
+    }
+  }
+}
+
+for(i in 1:nrow(nhbb_fresh)){
+  if(nhbb_fresh$ID[i] %in% woman_topic == T){
+     q_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
+      nhbb_fresh$q_file[i] <- q_filepath
+      a_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
+      nhbb_fresh$a_file[i] <- a_filepath
+      writeLines(nhbb_fresh$q_text[i], q_filepath)
+      writeLines(nhbb_fresh$a_text[i], a_filepath)
+  # write additional files for bonus questions + answers
+    if(nhbb_fresh$bonus_q_text[i] != ""){
+      bonus_q_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
+      nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
+      bonus_a_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
+      nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
+      writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
+      writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
+    } else if(nhbb_fresh$bonus_q_text[i] == ""){
+      nhbb_fresh$bonus_q_file[i] <- NA
+      nhbb_fresh$bonus_a_file[i] <- NA
+    }
+  } else if(nhbb_fresh$ID[i] %in% woman_topic == F & nhbb_fresh$ID[i] %in% woman_mentioned == F){
+      q_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
+      nhbb_fresh$q_file[i] <- q_filepath
+      a_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
+      nhbb_fresh$a_file[i] <- a_filepath
+      writeLines(nhbb_fresh$q_text[i], q_filepath)
+      writeLines(nhbb_fresh$a_text[i], a_filepath)
+  # write additional files for bonus questions + answers
+    if(nhbb_fresh$bonus_q_text[i] != ""){
+      bonus_q_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
+      nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
+      bonus_a_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
+      nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
+      writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
+      writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
+    } else if(nhbb_fresh$bonus_q_text[i] == ""){
+      nhbb_fresh$bonus_q_file[i] <- NA
+      nhbb_fresh$bonus_a_file[i] <- NA
+    }
+  }
+}
+```
+
+# Examining collocates from AntConc
+
+```{r 4-grams}
+wa_4gram <- read_tsv("data/4-gram_WA.txt")
+wm_4gram <- read_tsv("data/4-gram_WM.txt")
+nw_4gram <- read_tsv("data/4-gram_NW.txt")
+```
+
+```{r most-common}
+top_words_wa <- read_tsv("data/top_words_WA_stops.txt")
+top_words_wm <- read_tsv("data/top_words_WM_stops.txt")
+top_words_nw <- read_tsv("data/top_words_NW_stops.txt")
+
+# distinctive words
+keywords_WA <- read_tsv("data/1_keywords_WA.txt")
+keywords_WM <- read_tsv("data/1_keywords_WM.txt")
+```
+# Use SpaCy to select questions with PEOPLE as the answer
+
+I ought to compare questions for which a woman is the answer to questions for which a non-woman **person** is the answer. I will do this by using SpaCy's NER function to identify which answers are people.
+
+```{python ne-tags-answers}
+# process text into doc format
+nhbb_spacy = nhbb_spacy.fillna("")
+nhbb_spacy['a_text_doc'] = nhbb_spacy['a_text'].apply(process_text)
+nhbb_spacy['bonus_a_text_doc'] = nhbb_spacy['bonus_a_text'].apply(process_text)
+nhbb_spacy['bonus_q_text_doc'] = nhbb_spacy['bonus_q_text'].apply(process_text)
+# Apply function to q_text_doc column and store named entity tags in new column
+nhbb_spacy["ne_tags_a"] = nhbb_spacy["a_text_doc"].apply(extract_ne_tags)
+nhbb_spacy["ne_tags_bonus_a"] = nhbb_spacy["bonus_a_text_doc"].apply(extract_ne_tags)
+```
+
+```{r py-to-r-ner-a}
+nhbb_spacyr_a <- py_to_r(py$nhbb_spacy)
+
+person_answers <- nhbb_spacyr_a %>% 
+  filter(ne_tags_a == "PERSON" | ne_tags_bonus_a == "PERSON")
+
+person_IDs <- person_answers$ID
+```
+
+This method isn't flawless, but with a set this large it is more time-efficient than manually identifying every question with a person as the answer. 
+
+I'll now write these questions and answers to text files, like I did before. 
+
+For the record, I am including the full question and associated bonus questions, because bonus questions are meant to be on the same topic as the tossup. 
+
+```{r write-txt-files-people}
+nhbb_people <- nhbb_clean %>% 
+  filter(ID %in% person_IDs == T)
+
+# write txt files
+for (j in 1:nrow(nhbb_people)) {
+  q_filepath <- paste("people_all/", nhbb_people$ID[j], "_q.txt", sep = "")
+  nhbb_people$q_file[j] <- q_filepath
+  a_filepath <- paste("people_all/", nhbb_people$ID[j], "_a.txt", sep = "")
+  nhbb_people$a_file[j] <- a_filepath
+  writeLines(nhbb_people$q_text[j], q_filepath)
+  writeLines(nhbb_people$a_text[j], a_filepath)
+  # write additional files for bonus questions + answers
+  if(nhbb_people$bonus_q_text[j] != ""){
+    bonus_q_filepath <- paste("people_all/", nhbb_people$ID[j], "_bonus_q.txt", sep = "")
+    nhbb_people$bonus_q_file[j] <- bonus_q_filepath
+    bonus_a_filepath <- paste("people_all/", nhbb_people$ID[j], "_bonus_a.txt", sep = "")
+    nhbb_people$bonus_a_file[j] <- bonus_a_filepatx h
+    writeLines(nhbb_people$bonus_q_text[j], bonus_q_filepath)
+    writeLines(nhbb_people$bonus_a_text[j], bonus_a_filepath)
+  } else{
+    nhbb_people$bonus_q_file[j] <- NA
+    nhbb_people$bonus_a_file[j] <- NA
+  }
+}
+
+# now write txt files in separate folders for women and men 
+for(i in 1:nrow(nhbb_people)){
+  if(nhbb_people$ID[i] %in% woman_topic == F){
+      q_filepath <- paste("people_men/", nhbb_people$ID[i], "_q.txt", sep = "")
+      nhbb_people$q_file[i] <- q_filepath
+      a_filepath <- paste("people_men/", nhbb_people$ID[i], "_a.txt", sep = "")
+      nhbb_people$a_file[i] <- a_filepath
+      writeLines(nhbb_people$q_text[i], q_filepath)
+      writeLines(nhbb_people$a_text[i], a_filepath)
+  # write additional files for bonus questions + answers
+    if(nhbb_people$bonus_q_text[i] != ""){
+      bonus_q_filepath <- paste("people_men/", nhbb_people$ID[i], "_bonus_q.txt", sep = "")
+      nhbb_people$bonus_q_file[i] <- bonus_q_filepath
+      bonus_a_filepath <- paste("people_men/", nhbb_people$ID[i], "_bonus_a.txt", sep = "")
+      nhbb_people$bonus_a_file[i] <- bonus_a_filepath
+      writeLines(nhbb_people$bonus_q_text[i], bonus_q_filepath)
+      writeLines(nhbb_people$bonus_a_text[i], bonus_a_filepath)
+    } else if(nhbb_people$bonus_q_text[i] == ""){
+      nhbb_people$bonus_q_file[i] <- NA
+      nhbb_people$bonus_a_file[i] <- NA
+    }
+  }
+}
+```
+
+```{r count-people}
+nhbb_people_counts <- nhbb_people %>% 
+  select(ID, a_text, bonus_a_text) %>% 
+  group_by(a_text) %>% 
+  count()
+```
+
+# Use SpaCy to pick out all people named in questions
+
+```{python id-people}
+# Define function to extract words tagged as "PERSON"
+def extract_people(doc):
+  return[ent.text for ent in doc.ents if ent.label_ == "PERSON"]
+
+# Apply function to nhbb_spacy DF column "q_text_doc" and save in new column
+nhbb_spacy["people"] = nhbb_spacy["q_text_doc"].apply(extract_people)
+nhbb_spacy["bonus_people"] = nhbb_spacy["bonus_q_text_doc"].apply(extract_people)
+```
+
+```{r py-to-r-people}
+# only dealing with tossups for now --> bonuses are likely to repeat the same people anyways
+people <- py_to_r(py$nhbb_spacy) %>% 
+  select(people)
+
+# reusing code from the proper nouns experiment
+for (i in 1:nrow(people)){
+  people$people[i] <- str_remove_all(people$people[i], pattern = "c\\(")
+  people$people[i] <- str_remove_all(people$people[i], pattern = "\\)")
+  people$people[i] <- str_remove_all(people$people[i], pattern = "\"")
+  people$people[i] <- str_remove_all(people$people[i], pattern = "list\\(")
+  people$people[i] <- str_remove_all(people$people[i], pattern = "’s")
+  people$people[i] <- str_remove_all(people$people[i], pattern = "^a") 
+  people$people[i] <- str_trim(people$people[i])
+}
+
+people_count <- people %>%
+  filter(people != "") %>% 
+  separate_longer_delim(cols = people, delim = ", ") %>%
+  group_by(people) %>%
+  count() %>% 
+  arrange(desc(n))
+
+head(people_count)
+
+# I should also count the people who are answers!
+
+for (i in 1:nrow(person_answers)){
+  person_answers$a_text[i] <- str_trim(person_answers$a_text[i])
+}
+
+person_answers_count <- person_answers %>% 
+  group_by(a_text) %>% 
+  count() %>% 
+  arrange(desc(n))
+
+# and I'm going to manually add the women too 
+
+women_counts <- woman_named_df %>% 
+  filter(names != "") %>% 
+  separate_longer_delim(cols = names, delim = ", ") %>%
+  group_by(names) %>%
+  count() %>% 
+  arrange(desc(n))
+
+women_answer_counts <- woman_qs %>% 
+  filter(answer != "") %>% 
+  separate_longer_delim(cols = answer, delim = ", ") %>%
+  group_by(answer) %>%
+  count() %>% 
+  arrange(desc(n))
+
+## MESSED UP: ALL WOMEN ARE CURRENTLY COUNTING TWICE IF THEY GOT PICKED UP CORRECTLY BY SPACY
+## FIGURE OUT WHICH ARE DUPLICATES AND IF YOU ACTUALLY NEED TO JOIN THE WOMEN DF 
+
+combined_people_count <- full_join(people_count, person_answers_count, by = c("people" = "a_text")) %>% 
+  full_join(women_counts, by = c("people" = "names")) %>% 
+  full_join(women_answer_counts, by = c("people" = "answer")) %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(n.total = rowSums(across(where(is.numeric)))) %>% 
+  select(people, n.total) %>% 
+  arrange(desc(n.total))
+
+head(combined_people_count)
+```
+
+So, what are we expecting high schoolers to know? Jesus and the founding fathers. 
 

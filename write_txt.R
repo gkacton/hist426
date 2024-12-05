@@ -26,3 +26,4 @@ for (j in 1:nrow(nhbb)) {
     nhbb$bonus_a_file[j] <- NA
   }
 }
+

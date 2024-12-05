@@ -1,7 +1,7 @@
 
 # load in data ------------------------------------------------------------
 
-nhbb <- read.csv("NHBB_manifest.csv")
+nhbb <- read.csv("data/NHBB_manifest.csv")
 library(tidyverse)
 library(magrittr)
 library(stringr)
@@ -25,14 +25,12 @@ for (i in 1:nrow(nhbb)) {
 
 # Remove pronunciation guides, bonus characters, etc ----------------------
 
-# test
-
-test_exp <- nhbb$q_text[300]
-test_exp_clean <- str_remove_all(test_exp, "\\[.*?\\]") # to remove all strings of any number of characters that are square-brackets (such as pronunciation guides)
-test_exp_clean <- str_remove_all(test_exp_clean, "\\(\\*\\)") # to remove indicator of bonus (*)
-test_exp_clean
-
-# test successful
+# test -- test passed
+# 
+# test_exp <- nhbb$q_text[300]
+# test_exp_clean <- str_remove_all(test_exp, "\\[.*?\\]") # to remove all strings of any number of characters that are square-brackets (such as pronunciation guides)
+# test_exp_clean <- str_remove_all(test_exp_clean, "\\(\\*\\)") # to remove indicator of bonus (*)
+# test_exp_clean
 
 # loop to remove from all questions
 nhbb_clean <- nhbb

@@ -1,0 +1,11 @@
+Collocate	Rank	Freq(Scaled)	FreqLR	FreqL	FreqR	Range	Likelihood	Effect
+she	1	304	12	7	5	8	72.332	5.727
+husband	2	208	9	1	8	5	55.881	5.860
+her	3	1088	12	6	6	6	42.539	3.888
+divorced	4	16	2	1	1	1	16.776	7.390
+macmillan	4	16	2	1	1	1	16.776	7.390
+sit	4	16	2	1	1	1	16.776	7.390
+tact	4	16	2	1	1	1	16.776	7.390
+grigory	4	16	2	1	1	1	16.776	7.390
+potemkin	4	16	2	1	1	1	16.776	7.390
+bored	4	16	2	1	1	1	16.776	7.390

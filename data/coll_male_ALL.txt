@@ -1,0 +1,5 @@
+Collocate	Rank	Freq(Scaled)	FreqLR	FreqL	FreqR	Range	Likelihood	Effect
+europa	1	16	1	1	0	1	12.168	10.163
+astronomers	1	16	1	0	1	1	12.168	10.163
+constellation	1	16	1	0	1	1	12.168	10.163
+lovers	1	16	1	0	1	1	12.168	10.163

@@ -1,0 +1,22 @@
+Type	POS	Headword	Rank	Freq_Tar	Freq_Ref	Range_Tar	Range_Ref	NormFreq_Tar	NormFreq_Ref	NormRange_Tar	NormRange_Ref	Keyness (Likelihood)	Keyness (Effect)
+her	None	None	1	45	4	25	4	13493.253	62.967	0.219	0.001	243.107	0.027
+woman	None	None	2	24	5	14	5	7196.402	78.709	0.123	0.002	117.921	0.014
+she	None	None	3	17	0	14	0	5097.451	0.000	0.123	0.000	102.019	0.010
+husband	None	None	4	9	0	8	0	2698.651	0.000	0.070	0.000	53.989	0.005
+anne	None	None	4	9	0	9	0	2698.651	0.000	0.079	0.000	53.989	0.005
+goddess	None	None	4	9	0	6	0	2698.651	0.000	0.053	0.000	53.989	0.005
+deity	None	None	7	12	6	4	6	3598.201	94.451	0.035	0.002	49.694	0.007
+queen	None	None	8	10	2	10	2	2998.501	31.484	0.088	0.001	49.382	0.006
+person	None	None	9	13	21	9	19	3898.051	330.579	0.079	0.006	34.907	0.008
+coach	None	None	10	6	1	2	1	1799.100	15.742	0.018	0.000	30.348	0.004
+empress	None	None	11	4	0	3	0	1199.400	0.000	0.026	0.000	23.990	0.002
+female	None	None	12	5	2	4	2	1499.250	31.484	0.035	0.001	21.817	0.003
+ruler	None	None	13	12	36	7	23	3598.201	566.706	0.061	0.008	21.684	0.007
+hutchinson	None	None	14	4	1	4	1	1199.400	15.742	0.035	0.000	19.088	0.002
+sister	None	None	14	4	1	4	1	1199.400	15.742	0.035	0.000	19.088	0.002
+elizabeth	None	None	16	3	0	3	0	899.550	0.000	0.026	0.000	17.991	0.002
+aragon	None	None	16	3	0	3	0	899.550	0.000	0.026	0.000	17.991	0.002
+catherine	None	None	16	3	0	3	0	899.550	0.000	0.026	0.000	17.991	0.002
+beings	None	None	16	3	0	1	0	899.550	0.000	0.009	0.000	17.991	0.002
+lady	None	None	16	3	0	3	0	899.550	0.000	0.026	0.000	17.991	0.002
+basketball	None	None	16	3	0	2	0	899.550	0.000	0.018	0.000	17.991	0.002
