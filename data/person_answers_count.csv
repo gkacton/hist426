@@ -1,0 +1,441 @@
+"","a_text","n"
+"1","Richard Nixon",4
+"2","Saladin",4
+"3","Winston Churchill",4
+"4","Benedict Arnold",3
+"5","Benjamin Disraeli",3
+"6","Bill Clinton",3
+"7","Franklin Delano Roosevelt",3
+"8","Gustavus Adolphus",3
+"9","Henry VIII",3
+"10","Hernan Cortes",3
+"11","J. Edgar Hoover",3
+"12","Joseph McCarthy",3
+"13","Marquis de Lafayette",3
+"14","Richard I",3
+"15","Aaron Copland",2
+"16","Alexander the Great",2
+"17","Andrew Carnegie",2
+"18","Andrew Jackson",2
+"19","Anne Hutchinson",2
+"20","Benito Mussolini",2
+"21","Bob Dylan",2
+"22","Charles I",2
+"23","Corrupt Bargain",2
+"24","Dwight Eisenhower",2
+"25","Francis Drake",2
+"26","Frederick Douglass",2
+"27","Frederick the Great",2
+"28","George Smith Patton",2
+"29","George Washington",2
+"30","Giuseppe Garibaldi",2
+"31","Henry Clay",2
+"32","Henry the Navigator",2
+"33","J.P. Morgan",2
+"34","James Cook",2
+"35","John D. Rockefeller",2
+"36","John Marshall",2
+"37","John Steinbeck",2
+"38","Knights Hospitaller",2
+"39","Leonardo da Vinci",2
+"40","Library of Alexandria",2
+"41","Louis XIV",2
+"42","Macbeth",2
+"43","Malcolm X",2
+"44","Marco Polo",2
+"45","Mark Antony",2
+"46","Mark Twain",2
+"47","Muhammad Ali",2
+"48","Napoleon Bonaparte",2
+"49","Nathanael Greene",2
+"50","Nelson Mandela",2
+"51","North Korea",2
+"52","Oscar Wilde",2
+"53","Philip II",2
+"54","Pope Gregory I",2
+"55","Robert Mugabe",2
+"56","Roger Taney",2
+"57","Rudyard Kipling",2
+"58","Sam Houston",2
+"59","Samuel Adams",2
+"60","Sir Walter Scott",2
+"61","Suleiman I",2
+"62","William I",2
+"63","assassination of Archduke Franz Ferdinand",2
+"64","Aaron Burr",1
+"65","Adlai Stevenson II",1
+"66","Adolf Eichmann",1
+"67","Adolf Hitler",1
+"68","Al Capone",1
+"69","Al-Mansur",1
+"70","Alex Haley",1
+"71","Alexander Kerensky",1
+"72","Alexander Mitchell Palmer",1
+"73","Alexandria",1
+"74","Alexandria Ocasio-Cortez",1
+"75","Alexis de Tocqueville",1
+"76","Alfonso de Albuquerque",1
+"77","Amaterasu",1
+"78","Andrew Johnson",1
+"79","Andy Warhol",1
+"80","Angel Falls",1
+"81","Angela Merkel",1
+"82","Angkor Wat",1
+"83","Anne Boleyn",1
+"84","Anne Frank",1
+"85","Argentina",1
+"86","Arnold Schwarzenegger",1
+"87","Assassination of James Garfield",1
+"88","Babylon",1
+"89","Baldwin I",1
+"90","Barbary States",1
+"91","Basque Country",1
+"92","Battle of Dien Bien Phu",1
+"93","Battle of Hastings",1
+"94","Battle of Shiloh",1
+"95","Battle of Waterloo",1
+"96","Battle of Yorktown",1
+"97","Benjamin Franklin",1
+"98","Benjamin Harrison",1
+"99","Benjamin Netanyahu",1
+"100","Berlin Airlift",1
+"101","Berlin Wall",1
+"102","Bernhard Riemann",1
+"103","Billy Pilgrim",1
+"104","Black Sox Scandal",1
+"105","Boston",1
+"106","Boston, Massachusetts",1
+"107","Botany Bay",1
+"108","Buffalo Bill Cody",1
+"109","Burning of Washington D.C.",1
+"110","Byzantine Empire",1
+"111","Calvin Coolidge",1
+"112","Caroline Affar",1
+"113","Catherine the Great",1
+"114","Charles Cornwallis",1
+"115","Charles Darwin",1
+"116","Charles Dickens",1
+"117","Charles II",1
+"118","Charles Julius Guiteau",1
+"119","Charles Lindbergh",1
+"120","Charles Martel",1
+"121","Charles de Gaulle",1
+"122","Christianity",1
+"123","Christopher Marlowe",1
+"124","Clarence Thomas",1
+"125","Cleopatra",1
+"126","Colin Powell",1
+"127","Confucius",1
+"128","Constantine I",1
+"129","David",1
+"130","David McCullough",1
+"131","Delhi",1
+"132","Democratic Republic of the Congo",1
+"133","Denis Diderot",1
+"134","Diego Velazquez",1
+"135","Dmitri Shostakovich",1
+"136","Don Larsen",1
+"137","Douglas MacArthur",1
+"138","Dred Scott case",1
+"139","Dwight D. Eisenhower",1
+"140","Edgar Allan Poe",1
+"141","Elbridge Thomas Gerry",1
+"142","Eleanor Roosevelt",1
+"143","Elizabeth I",1
+"144","Elizabeth II",1
+"145","Elon Musk",1
+"146","Emilio Aguinaldo",1
+"147","Enver Hoxha",1
+"148","Erich Honecker",1
+"149","Erik the Red",1
+"150","Erwin Rommel",1
+"151","Eugène Delacroix",1
+"152","Felix Frankfurter",1
+"153","Ferdinand Marcos",1
+"154","Filippo Brunelleschi",1
+"155","First Persian Gulf War",1
+"156","Florentine Codex",1
+"157","Florida",1
+"158","Francis Marion",1
+"159","Francis Scott Key",1
+"160","Francisco Jose de Goya",1
+"161","Francisco Madero",1
+"162","Francisco Pizarro",1
+"163","Frank Sinatra",1
+"164","Fred Rogers",1
+"165","Friedrich Wilhelm von Steuben",1
+"166","G. Gordon Libby",1
+"167","Georg Wilhelm Friedrich Hegel",1
+"168","George B. McClellan",1
+"169","George Frideric Handel",1
+"170","George Wallace",1
+"171","George Washington University",1
+"172","George Westinghouse",1
+"173","Geronimo",1
+"174","Gibraltar",1
+"175","Gordon Brown",1
+"176","Great Pyramid of Giza",1
+"177","Great Sphinx of Giza",1
+"178","Grey Wolves",1
+"179","Grover Cleveland",1
+"180","Gunpowder Plot",1
+"181","Göbekli Tepe",1
+"182","Hans Holbein the Younger",1
+"183","Harriet Beecher Stowe",1
+"184","Harriet Tubman",1
+"185","Hassan as-Sabbah",1
+"186","Havana",1
+"187","Henry Clay Frick",1
+"188","Henry Ford",1
+"189","Henry II",1
+"190","Henry Ross Perot",1
+"191","Hirohito",1
+"192","Ho Chi Minh",1
+"193","Homestead Act",1
+"194","Horace Greeley",1
+"195","Horatio Lloyd Gates",1
+"196","Ian Smith",1
+"197","Indira Gandhi",1
+"198","Iroquois Confederacy",1
+"199","Isabella",1
+"200","Isis",1
+"201","J.D. Rockefeller Sr.",1
+"202","JFK Airport",1
+"203","Jack Reed",1
+"204","Jack the Ripper",1
+"205","Jacques Chirac",1
+"206","Jacques Necker",1
+"207","James Buchanan Duke",1
+"208","James Hill",1
+"209","James Monroe",1
+"210","James Polk",1
+"211","Janet Yellen",1
+"212","Jay Gould",1
+"213","Jean Sibelius",1
+"214","Jeb Bush",1
+"215","Jewel Voice Broadcast",1
+"216","Jim Crow Laws",1
+"217","Joan of Arc",1
+"218","Joe Biden",1
+"219","Johann Tserclaes Count of Tilly",1
+"220","John Brown",1
+"221","John C. Calhoun",1
+"222","John Calvin",1
+"223","John DeLorean",1
+"224","John F. Kennedy",1
+"225","John Hersey",1
+"226","John Jacob Astor",1
+"227","John Jay",1
+"228","John Knox",1
+"229","John Lennon",1
+"230","John Maynard Keynes",1
+"231","John Paul Jones",1
+"232","John Quincy Adams",1
+"233","John Roberts",1
+"234","John Stuart Mill",1
+"235","John Wilkes Booth",1
+"236","Joseph Lister",1
+"237","Joseph Plumb Martin",1
+"238","Joseph Smith",1
+"239","Joseph Stalin",1
+"240","Juan Domingo Perón",1
+"241","Kalahari Desert",1
+"242","Kalmar Union",1
+"243","Ken Jennings",1
+"244","Kendrick Lamar",1
+"245","Kim family",1
+"246","Kimberley",1
+"247","King George III",1
+"248","King John",1
+"249","Kitty Genovese",1
+"250","Knights Hospitallers",1
+"251","Ku Klux Klan",1
+"252","Lee",1
+"253","Leland Stanford",1
+"254","Leonhard Euler",1
+"255","Lewis and Clark expedition",1
+"256","Liu Bang",1
+"257","Lone Star Republic",1
+"258","Louis Farrakhan",1
+"259","Louis Pasteur",1
+"260","Louis XVI",1
+"261","Lyndon Baines Johnson",1
+"262","Léon Blum",1
+"263","Machu Picchu",1
+"264","Madeleine Albright",1
+"265","Magic Johnson",1
+"266","Magna Carta",1
+"267","Mahmoud Abbas",1
+"268","Malta",1
+"269","Manchester",1
+"270","Marcus Vispanius Agrippa",1
+"271","Maria Theresa",1
+"272","Mariana Islands",1
+"273","Marlon Brando",1
+"274","Martin Luther King Jr.",1
+"275","Martin Scorsese",1
+"276","Mauryan Dynasty",1
+"277","Maximilen Robespierre",1
+"278","Maximilien Robspierre",1
+"279","Mayflower Compact",1
+"280","Maysville Road",1
+"281","Meriwether Lewis",1
+"282","Mexican-American War",1
+"283","Michaelangelo",1
+"284","Mickey Mouse",1
+"285","Mikhail Gorbachev",1
+"286","Milan",1
+"287","Miles Davis",1
+"288","Moctezuma II",1
+"289","Monroe Doctrine",1
+"290","Montezuma II",1
+"291","Mozart's Requiem",1
+"292","Muammar Gadaffi",1
+"293","Mughal Dynasty",1
+"294","Muhammad",1
+"295","Muhammad Ali Jinnah",1
+"296","Munich",1
+"297","Mustafa Kemal Ataturk",1
+"298","Mustafa Kemal Atatürk",1
+"299","Napoleon III",1
+"300","Nat Turner",1
+"301","Nathan Hale",1
+"302","Nellie Bly",1
+"303","New Jersey Plan",1
+"304","New York",1
+"305","Niccolò Machiavelli",1
+"306","Nicholas II",1
+"307","Niels Bohr",1
+"308","Nintendo GameCube",1
+"309","O.J. Simpson murder case",1
+"310","Okinawa",1
+"311","Oliver Cromwell",1
+"312","Oliver Wendell Holmes, Jr",1
+"313","Orson Welles",1
+"314","Ottoman Empire",1
+"315","Partido Revolucionario Institucional",1
+"316","Pat Robertson",1
+"317","Pat Summitt",1
+"318","Patrick Henry",1
+"319","Percy Cleghorn Hobart",1
+"320","Persian Empire",1
+"321","Philip",1
+"322","Philip V",1
+"323","Pisa",1
+"324","Pol Pot",1
+"325","Poland",1
+"326","Pope Francis",1
+"327","Potter Stewart",1
+"328","Qin Er Shi",1
+"329","Qin Shi Huang",1
+"330","Ramayana",1
+"331","Reconquista",1
+"332","Roald Amundsen",1
+"333","Robber Baron",1
+"334","Robert F. Wagner",1
+"335","Robert Moses",1
+"336","Robert Peel",1
+"337","Robert Walpole First Earl of Oxford",1
+"338","Ronald Reagan",1
+"339","Runaway Scrape",1
+"340","Russian Serfs",1
+"341","Rutherford B. Hayes",1
+"342","S.S. Andrea Doria",1
+"343","Sahara Desert",1
+"344","Saint Cyril",1
+"345","Salvador Dalí",1
+"346","Samuel Houston",1
+"347","San Francisco 49ers",1
+"348","Santa Claus",1
+"349","Sappho",1
+"350","Scopes monkey trial",1
+"351","Scottish independence",1
+"352","Senator from Minnesota",1
+"353","Seneca Falls Convention",1
+"354","Sepoy Mutiny",1
+"355","Serfs",1
+"356","Sharpeville Massacre",1
+"357","Sher Shah",1
+"358","Shiva",1
+"359","Shivaji Bonsle",1
+"360","Sigmund Freud",1
+"361","Sima Qian",1
+"362","Simón Bolivar",1
+"363","Sir Isaac Newton",1
+"364","Sonia Sotomayor",1
+"365","Soviet nuclear program",1
+"366","Spain",1
+"367","Stanford University",1
+"368","Stephen Austin",1
+"369","Stephen Hawking",1
+"370","Steve Biko",1
+"371","Stonewall Inn",1
+"372","Susanna Dickinson",1
+"373","Tet Offensive",1
+"374","Theodore Roosevelt",1
+"375","Thomas Edison",1
+"376","Thomas Jefferson",1
+"377","Thomas Paine",1
+"378","Thomas Stonewall Jackson",1
+"379","Thorstein Veblen",1
+"380","Three-Fifths Compromise",1
+"381","Thurgood Marshall",1
+"382","Timothy McVeigh",1
+"383","Tokugawa Ieyasu",1
+"384","Tony Blair",1
+"385","Trans-Siberian Railway",1
+"386","Ty Cobb",1
+"387","US Supreme Court building",1
+"388","USS Maine",1
+"389","USS Missouri",1
+"390","Ulysses S. Grant",1
+"391","Ural Mountains",1
+"392","Valeriano Weyler",1
+"393","Valhalla",1
+"394","Valley Forge",1
+"395","Veracruz",1
+"396","Vesta",1
+"397","Via Appia",1
+"398","Vidkun Quisling",1
+"399","Viet Cong",1
+"400","Virginia",1
+"401","Vitus Bering",1
+"402","Vladimir Ilyich Lenin",1
+"403","W.E.B. Du Bois",1
+"404","Walter Scott",1
+"405","Walter Ulbricht",1
+"406","Wang Mang",1
+"407","Watergate scandal",1
+"408","Werner Heisenburg",1
+"409","Whistle",1
+"410","William Ewart Gladstone",1
+"411","William Halsey",1
+"412","William Howard Taft",1
+"413","William III",1
+"414","William Makepeace Thackeray",1
+"415","William Rehnquist",1
+"416","William Shakespeare",1
+"417","Willliam Barrett Travis",1
+"418","Wojciech Jaruzelski",1
+"419","Woodrow Wilson",1
+"420","World Health Organization",1
+"421","World War I",1
+"422","X-Ray",1
+"423","Yellow Turban Rebellion",1
+"424","Yo-Yo Ma",1
+"425","ZANU-PF",1
+"426","Zeus",1
+"427","Zheng He",1
+"428","assassination of Abraham Lincoln",1
+"429","assassination of Robert F. Kennedy",1
+"430","coal",1
+"431","cowboy",1
+"432","death of Joseph Stalin",1
+"433","electric car",1
+"434","electrons",1
+"435","marijuana",1
+"436","neutrinos",1
+"437","oxygen",1
+"438","sinking of the RMS Titanic",1
+"439","tapu",1
+"440","war chariots",1

@@ -1,1 +1,0 @@
-Billy the Kid

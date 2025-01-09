@@ -1,4 +1,0 @@
-Collocate	Rank	Freq(Scaled)	FreqLR	FreqL	FreqR	Range	Likelihood	Effect
-vote	1	112	3	0	3	3	21.306	6.525
-basketball	2	48	2	0	2	2	15.981	7.163
-limited	3	80	2	1	1	1	13.922	6.426

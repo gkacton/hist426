@@ -1,8 +1,0 @@
-Collocate	Rank	Freq(Scaled)	FreqLR	FreqL	FreqR	Range	Likelihood	Effect
-lightbulb	2	14	1	1	0	1	11.711	9.826
-feud	2	14	1	1	0	1	11.711	9.826
-inadvertently	2	14	1	1	0	1	11.711	9.826
-stripping	2	14	1	1	0	1	11.711	9.826
-spoons	2	14	1	1	0	1	11.711	9.826
-silverware	2	14	1	1	0	1	11.711	9.826
-cakes	2	14	1	0	1	1	11.711	9.826

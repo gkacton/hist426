@@ -1,17 +1,21 @@
 ﻿Variable,Type,Description,Acceptable.Values
 ID,character,"A unique identifier for each question block, generated from the year, set, tournament round, and lightning round numbers.",
 year,integer,The year the set was played in. ,4-digit year
-set,integer,"The difficulty level of the set. Options are: C, A, or Nationals","c, a, nationals"
-tournament_round,integer,"The round within a tournament that the set was played during. Will always be between 1 and 5, inclusive.","1, 2, 3, 4, 5"
-game_round,integer,"Round number within the game, sometimes called a ""quarter"". Will always be between 1 and 4, inclusive.","1, 2, 3, 4"
+set,integer,The difficulty level of the set.,"c, a, nationals"
+tournament_round,integer,The round within a tournament that the set was played during. ,"1, 2, 3, 4, 5"
+game_round,integer,"Round number within the game, sometimes called a ""quarter"". ","1, 2, 3, 4"
 lightning_round,integer,"If the question was played in round 3, indicates which of the 3 possible lightning rounds the question was part of.","1, 2, 3"
-question_num,integer,Number of the question within its quarter.,1 - 10
+question_num,integer,"Number of the question within its quarter. ""Extra"" indicates that the question was included at the end of the packet, only to be used in cases of a misread question or as a tiebreaker.","1 - 10, extra"
 type,character,What format is the question?,"tossup, tossup + bonus, or lightning"
 lightning_lead,character,The lead-in phrase for a lightning round. ,
 q_text,character,Text of the question.,
 a_text,character,Answer to the question.,
 bonus_q_text,character,"If question is of type ""tossup + bonus"", this variable contains the text of the bonus question.",
 bonus_a_text,character,"If question is of type ""tossup + bonus"", this variable contains the text of the answer to the bonus question.",
+is_person_a,boolean,Is the answer to the question a person?,"TRUE, FALSE"
+is_myth_a,boolean,Is the answer to the question a mythological or religious figure?,"TRUE, FALSE"
+is_person_b,boolean,Is the answer to the bonus question a person?,"TRUE, FALSE"
+is_myth_b,boolean,Is the answer to the bonus question a mythological or religious figure?,"TRUE, FALSE"
 woman_named,boolean,"Is a woman mentioned by name in the text of the question, answer, bonus question, or bonus answer?","TRUE, FALSE"
 is_fictional,boolean,Are any of the women named  a fictional character?,"TRUE, FALSE"
 is_myth,boolean,Are any of the women named a mythological or religious figure?,"TRUE, FALSE"
