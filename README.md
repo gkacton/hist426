@@ -1,6 +1,6 @@
 # HIST426: Digital Texts in the Humanities
-# Final Project
-Grace Acton
+## Final Project: Representation in National History Bowl Trivia Questions
+
 
 ## Guide to this repository
 In this repository, you'll find...
