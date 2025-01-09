@@ -5,29 +5,32 @@ output:
   html_document:
     df_print: paged
 ---
-```{r load-packages}
-library(tidyverse)
-library(reticulate)
-library(knitr)
-library(kableExtra)
-```
-# Research Questions
-**What histories are prioritized in National History Bowl questions, and how is this related to high school history curricula?**
 
-**To what extent are NHB questions overrepresenting/underrepresenting women, the global south, and military history?**
+# Welcome to my lab notebook!
 
+In the interest of reproducible research, I have preserved all of my analyses in this lab notebook. That means it's kind of messy! Code that does not work has been commented out, so this entire notebook should be able to be knit and viewed as an HTML document without issue. 
+
+
+# Research Question
+**What histories are prioritized in National History Bowl questions? Which histories are excluded?**
 
 ## Project Data
 
 This project analyzes thirty National History Bowl packets, each consisting of 56 to 61 questions. These sets represent two academic years: the first year available (2015-2016) and last year available (2021-2022). To glean a representative sample of each year, the first 5 packets from the C, A, and Nationals sets were chosen. B-sets were omitted due to their frequently similar difficulty level to C-sets. 
 
-Each question was copied from the PDF packet document available on the IAC website and read for OCR errors. During the transcription process, I read each question for women's names, using Google and Wikipedia to investigate unfamiliar names. I want to note that gender is a complicated, highly personal identity, and identifying women in history necessitates making many assumptions. I want to acknowledge that transgender, nonbinary, Two Spirit, and other people outside the western gender binary have always existed, whether our historical record includes them or not, and it is impossible to say whether I have correctly identified the gender of all individuals named in this data set. 
+Below is a data dictionary for the complete dataset, which is saved in the `data` folder as `nhbb_FULL_CLEAN.csv`.  
 
-Secondary to this important acknowledgement, I want to make clear my intent behind two additional metadata categories, `is_fictional` and `is_myth`. Many questions that are **about** a male author mention female characters from their works; I think it is important to differentiate between women historical figures, and fictional women. However, there are also female and feminine figures in many mythological and religious systems, who I don't feel should be categorized the same way as literary characters. For example, there are questions about several Greek and Roman goddesses; even if, say, Athena does not feel "real" to me, she did to the people who worshiped her. As such, religious and mythological figures are separated from literary characters in my metadata scheme. If a named woman is a literary figure, then `is_fictional = TRUE`, whereas if she is a mythological or religious entity, `is_myth = TRUE`. 
+```{r load-packages}
+# use tidyverse packages for data cleaning
+library(tidyverse)
 
-Lastly, there is the issue of distinguishing questions which mention a woman from questions **about** a woman -- that is, questions for which the answer is a named woman. To facilitate the separation of these two categories, the field `is_answer` will have value `TRUE` when a woman is the answer to the question, but remain `FALSE` if she is merely mentioned in a question whose answer is a different historical topic. 
+# use reticulate package to access python
+library(reticulate)
 
-Below is a data dictionary for the dataframes `nhbb`, and `nhbb_clean`
+# use knitr and kableextra to create tables
+library(knitr)
+library(kableExtra)
+```
 
 ```{r data-dict}
 data_dict <- read.csv("data/data_dict_nhbb.csv")
@@ -41,37 +44,47 @@ kable(data_dict) %>%
 
   Although there has already been an element of human oversight of the questions -- namely, my reading the questions as I transcribed them in order to detect OCR errors and identify womens names -- some formatting elements of National History Bowl questions are easier to remove or rectify in an automated fashion. Many questions contain pronunciation guides, which aren't necessary to this analysis. Additionally, special characters are used in fourth quarter questions to identify the cut-off points between the 30-point, 20-point, and 10-point portions of the questions. As an exemplar of the complex formatting of a fourth quarter question, I provide Question 5 from Quarter 4 of Round 2 of the 2022 National Championship:
   
-**This country resettled Jewish refugees from Nazi Germany in the town of Sosúa [[soh-SOO-ah]] after the Évian Conference. During one massacre in this country, the fate of the victims was determined by how they pronounced the term "perejil'' [[peh-reh-HEEL]] (+)</u> when soldiers held up a certain herb. One leader of this country had several thousands migrants from a neighboring country killed in the Parsley Massacre and was nicknamed "El (*)** Jefe" [[HE-feh]]. For ten points, name this Caribbean country that was ruled for over thirty years by Rafael Trujillo [[troo-HEE-yoh]] from Santo Domingo.
+<strong><u>This country resettled Jewish refugees from Nazi Germany in the town of Sosúa [[soh-SOO-ah]] after the Évian Conference. During one massacre in this country, the fate of the victims was determined by how they pronounced the term "perejil'' [[peh-reh-HEEL]] (+)</u> when soldiers held up a certain herb. One leader of this country had several thousands migrants from a neighboring country killed in the Parsley Massacre and was nicknamed "El (*)</strong> Jefe" [[HE-feh]]. For ten points, name this Caribbean country that was ruled for over thirty years by Rafael Trujillo [[troo-HEE-yoh]] from Santo Domingo.
 
 This question has special characters "(+)" and "(*)", as well as double-bracketed pronunciation guides, all of which are superfluous to the text necessary for my analysis. The script `data_prep.R` uses the `stringr` package to remove these additional characters, leaving just the plaintext of the questions.
 
-Additionally, the `data_prep.R` script uses data about the packets and questions to generate a unique identifier for each question and answer. This identifier is ispired by a standard museum object labeling format, which takes the form of `year.accession.box.object`. In this case, I have amended the format to be `year.set.tournament_round.quarter.question_number`. _Quarter 3 questions have an additional digit indicated which thematic lightning round option the question was part of._ 
+Additionally, the `data_prep.R` script uses metadata about the packets and questions to generate a unique identifier for each question and answer. This identifier is ispired by a standard museum object labeling format, which takes the form of `year.accession.box.object`. In this case, I have amended the format to be `year.set.tournament_round.quarter.question_number`. _Quarter 3 questions have an additional digit indicated which thematic lightning round option the question was part of._ 
 
 When questions and answers are written to text files, the ID number is followed by an underscore and an additional identifier: `_q` for question, `_a` for answer, `_bonus_q` for quarter 2 bonus questions, or `_bonus_a` for answers to quarter 2 bonus questions. Creating separate files for questions and answers allow them to be analyzed separately, and embedding these identifiers into the file names will allow me to easily separate questions from answers, while having a shared ID number maintains the connection between a question and its corresponding answer. 
 
-```{r setup, echo=F, message=F}
-# use tidyverse packages for data cleaning
-library(tidyverse)
-
-# use reticulate package to access python
-library(reticulate)
-
-# use knitr and kableextra to create tables
-library(knitr)
-library(kableExtra)
-```
-
 ```{r data-source, message=F}
-# use data prep script as source - script available in GitHub
-source("data_prep.R")
+# use data prep script as source
 
-kable(head(nhbb_clean %>% select(ID, q_text, a_text))) %>% 
-  kable_styling(latex_options = "striped",
-                full_width = T) %>% 
-  column_spec(2, width = "6in")
+# if scripts aren't loading, make sure that the working directory is the project directory! 
+
+source("~/Desktop/hist426/scripts/data_prep.R") # change this to your correct local filepath 
+
+# the version of the data that is loaded in this script does not contain all of the necessary metadata
+# the following code adds additional metadata to each question, and saves the end product as `nhbb_clean`
+
+people_answers_tags <- read.csv("data/nhbb_added_metadata.csv") %>% 
+  select(ID, is_person_a, is_myth_a, is_person_b, is_myth_b) %>% 
+  replace(is.na(.), FALSE)
+
+nhbb_clean <- left_join(nhbb_clean, people_answers_tags, by = c("ID")) %>% 
+  select(ID, year, set, tournament_round, game_round, lightning_round, question_num,
+         type, lightning_lead, q_text, a_text, bonus_q_text, bonus_a_text, is_person_a,
+         is_myth_a, is_person_b, is_myth_b, woman_named, is_fictional, is_myth, is_answer,
+         names, author)
 ```
 
-# Statistical Analysis #1: Women's Inclusion/Exclusion
+```{r load-write-txt}
+# load write_txt function from its script
+source("~/Desktop/hist426/scripts/write_txt.R") # change this to your correct local filepath 
+```
+
+**To bypass the need to run the `data_prep.R` script, run the following code block, which loads the complete, cleaned dataset as `nhbb_clean`.**
+
+```{r load-full-set}
+nhbb_clean <- read.csv("nhbb_FULL_CLEAN.csv")
+```
+
+# Quantifying Women's Inclusion/Exclusion
 
 ### 1. For how many questions is the answer a woman?
 
@@ -445,9 +458,11 @@ places_count <- places %>%
 head(places_count)
 ```
 
-# Use `leaflet` to make a map of named places
+# Mapping
 
-```{r load-leaflet}
+I've commented these out because of how much time and RAM they take to run. If you want to run them, you'll need to un-comment the blocks.
+
+```{r load-map-packs}
 library(leaflet)
 library(tidygeocoder)
 library(basemaps)
@@ -482,10 +497,6 @@ library(basemaps)
 #              radius = ~n)
 ```
 
-This map reveals a **huge** number of geocoding mistakes -- "DC" and "Armenia" have both ended up in Colombia...
-Next I should try using historical gazetteers to geocode rather than modern geocoding tools! 
-I can also use either the Getty TGN or another similar dataset to categorize the places mentioned into continental groupings. 
-
 ```{r gg-map}
 # library(maps)
 # 
@@ -498,7 +509,10 @@ I can also use either the Getty TGN or another similar dataset to categorize the
 #   geom_point(data = nhbb_places, aes(longitude, lattitude,
 #                               color = "red"))
 ```
-# After OpenRefining
+
+This approach had a **huge** number of geocoding mistakes -- "DC" and "Armenia" have both ended up in Colombia... the magnitude and quantity of errors makes the geocoded data unusable for analysis. I'm glad I tried this approach, but also happy to comment it out. :) 
+
+# Using OpenRefine to reconcile place names
 
 I used OpenRefine's data reconcilliation capability to reconcile place names identified by SpaCy against the Getty Thesaurus of Geographic Names. The hierarchical structure of the Getty TGN let me identify places at the country and continent level, which lets me analyze the geographical spread of the questions more reliably than geocoding individual points. This first round of analysis is only with one toponym per question, I will be going back to OpenRefine to reconcile the remaining toponyms later. 
 
@@ -571,12 +585,12 @@ openrefine <- read.csv("data/nhbb_places_ALL.csv")
 This table is a hot mess. I did edit it so that every row has a question ID, which will let me merge all of the data by question. But first, I need to separate out each geographical column and its `type` identifying column, pair the toponym with its most relevant type, and then merge them back together. 
 
 I want to keep track of the following types: 
-- Cities
-- Empires
-- Primary political entities (countries), both current and former
-- Continents 
-- Geographic regions (ex: West Africa)
-- Ancient sites/ruins 
+* Cities
+* Empires
+* Primary political entities (countries), both current and former
+* Continents 
+* Geographic regions (ex: West Africa)
+* Ancient sites/ruins 
 
 It is **very** unlikely that any individual toponym will be included in **all** of these categories, which makes the analysis more straightforward!
 
@@ -707,7 +721,7 @@ top_3 <- top_3 %>%
   filter(q_place_3plus != "") 
 ``` 
 
-In total, `r sum(nrow(top_1), nrow(top_2), nrow(top_3))` places named in tossup questions in this set are cities, nations, regions, continents, etc., as determine by SpaCy's named entity recognition and my minimal editing to remove non-place names. I am absoulutely sure that there are places missing, and a future analysis of these questions would benefit from manually compiling place names. 
+In total, `r sum(nrow(top_1), nrow(top_2), nrow(top_3))` places named in tossup questions in this set are cities, nations, regions, continents, etc., as determine by SpaCy's named entity recognition and my minimal editing to remove non-place names. I am absolutely sure that there are places missing, and a future analysis of these questions would benefit from manually compiling place names. 
 
 ```{r compile-places}
 top_1 <- top_1 %>% 
@@ -728,9 +742,11 @@ tops <- rbind(top_1, top_2, top_3)
 
 ## Actually, I want to keep ALL named places that I've reconciled! 
 
-I should go back and clean the data to include ALL place names, not just those in my desired categories, to determine the total number of named places in tossup questions. 
+I should go back and clean the data to include ALL place names, not just those in my desired categories, to determine the **total number of named places** in tossup questions. 
 
 ```{r all-places}
+# I probably could/should have written a function to do this...
+
 places_1 <- openrefine %>% 
   select(ID, q_place_1, q_place_type_1) %>% 
   filter(q_place_1 != "") %>% 
@@ -764,7 +780,7 @@ places_3 <- openrefine %>%
 all_places <- rbind(places_1, places_2, places_3)
 ```
 
-The `all_places` dataframe contains all places named in tossup questions, as recognized by SpaCy **and** the Getty Vocabularies. 
+The `all_places` dataframe contains all places named in tossup questions, as recognized by SpaCy **and** the Getty TGN. 
 
 ## Counting countries
 
@@ -1055,10 +1071,29 @@ cont_counts <- full_join(cont_counts_1,
 
 ## Plotting distributions
 
+```{r fonts-prep}
+library(extrafont)
+library(scales)
+
+# run if extrafont is new to the system:
+#font_import()
+
+# run to see all fonts:
+# fonts()
+```
+
+
 ```{r continent-bar}
-ggplot(cont_counts) +
+cont_plot <- ggplot(cont_counts) +
   geom_col(aes(x = fct_rev(fct_reorder(place, total)),
-               y = total))
+               y = total)) +
+  theme_minimal() +
+  scale_x_discrete(labels = label_wrap(width = 12)) +
+  xlab("Continent") +
+  ylab("Total Named Places") +
+  theme(text = element_text(family = "Courier New"))
+
+cont_plot
 ```
 
 I want to do a graph that colors each country according to its continent, but I need to join continent values in to the country counts dataframe to do this.
@@ -1111,7 +1146,7 @@ for(i in 1:nrow(df)){
       }
     } 
   }
-  # manually fix some errors/NAs
+  # manually fix some errors/NAs 
  if(df$place[i] == "Holy Roman Empire" |
     df$parent_hierarchy[i] == "Holy Roman Empire"){
    cc$country[i] <- "Holy Roman Empire"
@@ -1268,6 +1303,11 @@ country_cont_counts$continent[34] <- "Europe"
 country_cont_counts$continent[82] <- "Europe"
 country_cont_counts$continent[123] <- "Asia"
 
+continent_counts <- country_cont_counts %>% 
+  group_by(continent) %>% 
+  summarize(total = sum(total)) %>% 
+  mutate(proportion = total/sum(country_cont_counts$total))
+
 ```
 
 # Plot frequencies of countries, colored by continent
@@ -1278,99 +1318,89 @@ ggplot(country_cont_counts) +
                fill = continent))
 ```
 
+There's a bit too much information happening all at once in this visualization, but it's interesting to see the distribution of questions by country/continent. That tall bar is the U.S.
+
 # Isolating questions that mention women for use in AntConc
 
-I have one folder that contains text files for every question and answer in the set. However, I want to be able to use AntConc to compare questions that mention women, questions that are **about** women, and questions that ignore women. So, I need a folder of text files for each of these categories. I'll use the same for-loop as I did to write the text files originally, but use `if` statements to restrict which questions are written to files. 
+I have one folder that contains text files for every question and answer in the set. However, I want to be able to use AntConc to compare questions that mention women, questions that have women as the answer line, and questions that ignore women. So, I need a folder of text files for each of these categories. I'll use the same for-loop as I did to write the text files originally, but use `if` statements to restrict which questions are written to files. 
 
 ```{r category-txt-files}
-woman_mentioned <- woman_named_df$ID
-woman_topic <- woman_qs$ID
+# This code doesn't need to be run! The `corpora` directory contains folders with all of the questions that mention a woman (folder = woman_named_txt), have a woman answer ((folder = woman_answer_txt)), do not mention women at all (folder = woman_ignored_txt)
 
-nhbb_fresh <- nhbb_clean 
+# If you really want to run this giant block, just un-comment the rest of the block.
 
-for(i in 1:nrow(nhbb_fresh)){
-  if(nhbb_fresh$ID[i] %in% woman_mentioned == T){
-      q_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
-      nhbb_fresh$q_file[i] <- q_filepath
-      a_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
-      nhbb_fresh$a_file[i] <- a_filepath
-      writeLines(nhbb_fresh$q_text[i], q_filepath)
-      writeLines(nhbb_fresh$a_text[i], a_filepath)
-  # write additional files for bonus questions + answers
-    if(nhbb_fresh$bonus_q_text[i] != ""){
-      bonus_q_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
-      nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
-      bonus_a_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
-      nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
-      writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
-      writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
-    } else if(nhbb_fresh$bonus_q_text[i] == ""){
-      nhbb_fresh$bonus_q_file[i] <- NA
-      nhbb_fresh$bonus_a_file[i] <- NA
-    }
-  }
-}
+# woman_mentioned <- woman_named_df$ID
+# woman_topic <- woman_qs$ID
+# 
+# nhbb_fresh <- nhbb_clean 
+# 
+# 
+# for(i in 1:nrow(nhbb_fresh)){
+#   if(nhbb_fresh$ID[i] %in% woman_mentioned == T){
+#       q_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
+#       nhbb_fresh$q_file[i] <- q_filepath
+#       a_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
+#       nhbb_fresh$a_file[i] <- a_filepath
+#       writeLines(nhbb_fresh$q_text[i], q_filepath)
+#       writeLines(nhbb_fresh$a_text[i], a_filepath)
+#   # write additional files for bonus questions + answers
+#     if(nhbb_fresh$bonus_q_text[i] != ""){
+#       bonus_q_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
+#       nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
+#       bonus_a_filepath <- paste("woman_named_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
+#       nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
+#       writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
+#       writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
+#     } else if(nhbb_fresh$bonus_q_text[i] == ""){
+#       nhbb_fresh$bonus_q_file[i] <- NA
+#       nhbb_fresh$bonus_a_file[i] <- NA
+#     }
+#   }
+# }
 
-for(i in 1:nrow(nhbb_fresh)){
-  if(nhbb_fresh$ID[i] %in% woman_topic == T){
-     q_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
-      nhbb_fresh$q_file[i] <- q_filepath
-      a_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
-      nhbb_fresh$a_file[i] <- a_filepath
-      writeLines(nhbb_fresh$q_text[i], q_filepath)
-      writeLines(nhbb_fresh$a_text[i], a_filepath)
-  # write additional files for bonus questions + answers
-    if(nhbb_fresh$bonus_q_text[i] != ""){
-      bonus_q_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
-      nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
-      bonus_a_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
-      nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
-      writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
-      writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
-    } else if(nhbb_fresh$bonus_q_text[i] == ""){
-      nhbb_fresh$bonus_q_file[i] <- NA
-      nhbb_fresh$bonus_a_file[i] <- NA
-    }
-  } else if(nhbb_fresh$ID[i] %in% woman_topic == F & nhbb_fresh$ID[i] %in% woman_mentioned == F){
-      q_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
-      nhbb_fresh$q_file[i] <- q_filepath
-      a_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
-      nhbb_fresh$a_file[i] <- a_filepath
-      writeLines(nhbb_fresh$q_text[i], q_filepath)
-      writeLines(nhbb_fresh$a_text[i], a_filepath)
-  # write additional files for bonus questions + answers
-    if(nhbb_fresh$bonus_q_text[i] != ""){
-      bonus_q_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
-      nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
-      bonus_a_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
-      nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
-      writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
-      writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
-    } else if(nhbb_fresh$bonus_q_text[i] == ""){
-      nhbb_fresh$bonus_q_file[i] <- NA
-      nhbb_fresh$bonus_a_file[i] <- NA
-    }
-  }
-}
+# for(i in 1:nrow(nhbb_fresh)){
+#   if(nhbb_fresh$ID[i] %in% woman_topic == T){
+#      q_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
+#       nhbb_fresh$q_file[i] <- q_filepath
+#       a_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
+#       nhbb_fresh$a_file[i] <- a_filepath
+#       writeLines(nhbb_fresh$q_text[i], q_filepath)
+#       writeLines(nhbb_fresh$a_text[i], a_filepath)
+#   # write additional files for bonus questions + answers
+#     if(nhbb_fresh$bonus_q_text[i] != ""){
+#       bonus_q_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
+#       nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
+#       bonus_a_filepath <- paste("woman_answer_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
+#       nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
+#       writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
+#       writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
+#     } else if(nhbb_fresh$bonus_q_text[i] == ""){
+#       nhbb_fresh$bonus_q_file[i] <- NA
+#       nhbb_fresh$bonus_a_file[i] <- NA
+#     }
+#   } else if(nhbb_fresh$ID[i] %in% woman_topic == F & nhbb_fresh$ID[i] %in% woman_mentioned == F){
+#       q_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_q.txt", sep = "")
+#       nhbb_fresh$q_file[i] <- q_filepath
+#       a_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_a.txt", sep = "")
+#       nhbb_fresh$a_file[i] <- a_filepath
+#       writeLines(nhbb_fresh$q_text[i], q_filepath)
+#       writeLines(nhbb_fresh$a_text[i], a_filepath)
+#   # write additional files for bonus questions + answers
+#     if(nhbb_fresh$bonus_q_text[i] != ""){
+#       bonus_q_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_bonus_q.txt", sep = "")
+#       nhbb_fresh$bonus_q_file[i] <- bonus_q_filepath
+#       bonus_a_filepath <- paste("women_ignored_txt/", nhbb_fresh$ID[i], "_bonus_a.txt", sep = "")
+#       nhbb_fresh$bonus_a_file[i] <- bonus_a_filepath
+#       writeLines(nhbb_fresh$bonus_q_text[i], bonus_q_filepath)
+#       writeLines(nhbb_fresh$bonus_a_text[i], bonus_a_filepath)
+#     } else if(nhbb_fresh$bonus_q_text[i] == ""){
+#       nhbb_fresh$bonus_q_file[i] <- NA
+#       nhbb_fresh$bonus_a_file[i] <- NA
+#     }
+#   }
+# }
 ```
 
-# Examining collocates from AntConc
-
-```{r 4-grams}
-wa_4gram <- read_tsv("data/4-gram_WA.txt")
-wm_4gram <- read_tsv("data/4-gram_WM.txt")
-nw_4gram <- read_tsv("data/4-gram_NW.txt")
-```
-
-```{r most-common}
-top_words_wa <- read_tsv("data/top_words_WA_stops.txt")
-top_words_wm <- read_tsv("data/top_words_WM_stops.txt")
-top_words_nw <- read_tsv("data/top_words_NW_stops.txt")
-
-# distinctive words
-keywords_WA <- read_tsv("data/1_keywords_WA.txt")
-keywords_WM <- read_tsv("data/1_keywords_WM.txt")
-```
 # Use SpaCy to select questions with PEOPLE as the answer
 
 I ought to compare questions for which a woman is the answer to questions for which a non-woman **person** is the answer. I will do this by using SpaCy's NER function to identify which answers are people.
@@ -1402,61 +1432,86 @@ I'll now write these questions and answers to text files, like I did before.
 For the record, I am including the full question and associated bonus questions, because bonus questions are meant to be on the same topic as the tossup. 
 
 ```{r write-txt-files-people}
-nhbb_people <- nhbb_clean %>% 
-  filter(ID %in% person_IDs == T)
+# Like for the block named `category-txt-files` you don't need to run this one -- the `corpora` directory contains the folder `people-answers`
+# ALSO, I didn't even end up using this method to generate that corpus! You'll see shortly that I manually added metadata to identify which questions had people as the answers.
 
-# write txt files
-for (j in 1:nrow(nhbb_people)) {
-  q_filepath <- paste("people_all/", nhbb_people$ID[j], "_q.txt", sep = "")
-  nhbb_people$q_file[j] <- q_filepath
-  a_filepath <- paste("people_all/", nhbb_people$ID[j], "_a.txt", sep = "")
-  nhbb_people$a_file[j] <- a_filepath
-  writeLines(nhbb_people$q_text[j], q_filepath)
-  writeLines(nhbb_people$a_text[j], a_filepath)
-  # write additional files for bonus questions + answers
-  if(nhbb_people$bonus_q_text[j] != ""){
-    bonus_q_filepath <- paste("people_all/", nhbb_people$ID[j], "_bonus_q.txt", sep = "")
-    nhbb_people$bonus_q_file[j] <- bonus_q_filepath
-    bonus_a_filepath <- paste("people_all/", nhbb_people$ID[j], "_bonus_a.txt", sep = "")
-    nhbb_people$bonus_a_file[j] <- bonus_a_filepatx h
-    writeLines(nhbb_people$bonus_q_text[j], bonus_q_filepath)
-    writeLines(nhbb_people$bonus_a_text[j], bonus_a_filepath)
-  } else{
-    nhbb_people$bonus_q_file[j] <- NA
-    nhbb_people$bonus_a_file[j] <- NA
-  }
-}
-
-# now write txt files in separate folders for women and men 
-for(i in 1:nrow(nhbb_people)){
-  if(nhbb_people$ID[i] %in% woman_topic == F){
-      q_filepath <- paste("people_men/", nhbb_people$ID[i], "_q.txt", sep = "")
-      nhbb_people$q_file[i] <- q_filepath
-      a_filepath <- paste("people_men/", nhbb_people$ID[i], "_a.txt", sep = "")
-      nhbb_people$a_file[i] <- a_filepath
-      writeLines(nhbb_people$q_text[i], q_filepath)
-      writeLines(nhbb_people$a_text[i], a_filepath)
-  # write additional files for bonus questions + answers
-    if(nhbb_people$bonus_q_text[i] != ""){
-      bonus_q_filepath <- paste("people_men/", nhbb_people$ID[i], "_bonus_q.txt", sep = "")
-      nhbb_people$bonus_q_file[i] <- bonus_q_filepath
-      bonus_a_filepath <- paste("people_men/", nhbb_people$ID[i], "_bonus_a.txt", sep = "")
-      nhbb_people$bonus_a_file[i] <- bonus_a_filepath
-      writeLines(nhbb_people$bonus_q_text[i], bonus_q_filepath)
-      writeLines(nhbb_people$bonus_a_text[i], bonus_a_filepath)
-    } else if(nhbb_people$bonus_q_text[i] == ""){
-      nhbb_people$bonus_q_file[i] <- NA
-      nhbb_people$bonus_a_file[i] <- NA
-    }
-  }
-}
+# nhbb_people <- nhbb_clean %>% 
+#   filter(ID %in% people_answers$ID == T)
+# 
+# # write txt files
+# for (j in 1:nrow(nhbb_people)) {
+#   q_filepath <- paste("people_answers/all/", nhbb_people$ID[j], "_q.txt", sep = "")
+#   nhbb_people$q_file[j] <- q_filepath
+#   a_filepath <- paste("people_answers/all/", nhbb_people$ID[j], "_a.txt", sep = "")
+#   nhbb_people$a_file[j] <- a_filepath
+#   writeLines(nhbb_people$q_text[j], q_filepath)
+#   writeLines(nhbb_people$a_text[j], a_filepath)
+#   # write additional files for bonus questions + answers
+#   if(nhbb_people$bonus_q_text[j] != ""){
+#     bonus_q_filepath <- paste("people_answers/all/", nhbb_people$ID[j], "_bonus_q.txt", sep = "")
+#     nhbb_people$bonus_q_file[j] <- bonus_q_filepath
+#     bonus_a_filepath <- paste("people_answers/all/", nhbb_people$ID[j], "_bonus_a.txt", sep = "")
+#     nhbb_people$bonus_a_file[j] <- bonus_a_filepath
+#     writeLines(nhbb_people$bonus_q_text[j], bonus_q_filepath)
+#     writeLines(nhbb_people$bonus_a_text[j], bonus_a_filepath)
+#   } else{
+#     nhbb_people$bonus_q_file[j] <- NA
+#     nhbb_people$bonus_a_file[j] <- NA
+#   }
+# }
+# 
+# # now write txt files in separate folders for women and men 
+# for(i in 1:nrow(nhbb_people)){
+#   if(nhbb_people$ID[i] %in% woman_topic == F){
+#       q_filepath <- paste("people_answers/men/", nhbb_people$ID[i], "_q.txt", sep = "")
+#       nhbb_people$q_file[i] <- q_filepath
+#       a_filepath <- paste("people_answers/men/", nhbb_people$ID[i], "_a.txt", sep = "")
+#       nhbb_people$a_file[i] <- a_filepath
+#       writeLines(nhbb_people$q_text[i], q_filepath)
+#       writeLines(nhbb_people$a_text[i], a_filepath)
+#   # write additional files for bonus questions + answers
+#     if(nhbb_people$bonus_q_text[i] != ""){
+#       bonus_q_filepath <- paste("people_answers/men/", nhbb_people$ID[i], "_bonus_q.txt", sep = "")
+#       nhbb_people$bonus_q_file[i] <- bonus_q_filepath
+#       bonus_a_filepath <- paste("people_answers/men/", nhbb_people$ID[i], "_bonus_a.txt", sep = "")
+#       nhbb_people$bonus_a_file[i] <- bonus_a_filepath
+#       writeLines(nhbb_people$bonus_q_text[i], bonus_q_filepath)
+#       writeLines(nhbb_people$bonus_a_text[i], bonus_a_filepath)
+#     } else if(nhbb_people$bonus_q_text[i] == ""){
+#       nhbb_people$bonus_q_file[i] <- NA
+#       nhbb_people$bonus_a_file[i] <- NA
+#     }
+#   }
+#   else if(nhbb_people$ID[i] %in% woman_topic == T){
+#       q_filepath <- paste("people_answers/women/", nhbb_people$ID[i], "_q.txt", sep = "")
+#       nhbb_people$q_file[i] <- q_filepath
+#       a_filepath <- paste("people_answers/women/", nhbb_people$ID[i], "_a.txt", sep = "")
+#       nhbb_people$a_file[i] <- a_filepath
+#       writeLines(nhbb_people$q_text[i], q_filepath)
+#       writeLines(nhbb_people$a_text[i], a_filepath)
+#   # write additional files for bonus questions + answers
+#     if(nhbb_people$bonus_q_text[i] != ""){
+#       bonus_q_filepath <- paste("people_answers/women/", nhbb_people$ID[i], "_bonus_q.txt", sep = "")
+#       nhbb_people$bonus_q_file[i] <- bonus_q_filepath
+#       bonus_a_filepath <- paste("people_answers/women/", nhbb_people$ID[i], "_bonus_a.txt", sep = "")
+#       nhbb_people$bonus_a_file[i] <- bonus_a_filepath
+#       writeLines(nhbb_people$bonus_q_text[i], bonus_q_filepath)
+#       writeLines(nhbb_people$bonus_a_text[i], bonus_a_filepath)
+#     } else if(nhbb_people$bonus_q_text[i] == ""){
+#       nhbb_people$bonus_q_file[i] <- NA
+#       nhbb_people$bonus_a_file[i] <- NA
+#     }
+#   }
+# }
 ```
 
 ```{r count-people}
-nhbb_people_counts <- nhbb_people %>% 
-  select(ID, a_text, bonus_a_text) %>% 
-  group_by(a_text) %>% 
-  count()
+# This block only works if you run all of the above blocks 
+
+# nhbb_people_counts <- nhbb_people %>% 
+#   select(ID, a_text, bonus_a_text) %>% 
+#   group_by(a_text) %>% 
+#   count()
 ```
 
 # Use SpaCy to pick out all people named in questions
@@ -1471,10 +1526,11 @@ nhbb_spacy["people"] = nhbb_spacy["q_text_doc"].apply(extract_people)
 nhbb_spacy["bonus_people"] = nhbb_spacy["bonus_q_text_doc"].apply(extract_people)
 ```
 
-```{r py-to-r-people}
+```{r py-to-r-people, warning = F}
 # only dealing with tossups for now --> bonuses are likely to repeat the same people anyways
 people <- py_to_r(py$nhbb_spacy) %>% 
-  select(people)
+  select(people) %>% 
+  mutate(people = as.vector(people))
 
 # reusing code from the proper nouns experiment
 for (i in 1:nrow(people)){
@@ -1487,14 +1543,14 @@ for (i in 1:nrow(people)){
   people$people[i] <- str_trim(people$people[i])
 }
 
-people_count <- people %>%
+people_q_count <- people %>%
   filter(people != "") %>% 
   separate_longer_delim(cols = people, delim = ", ") %>%
   group_by(people) %>%
   count() %>% 
   arrange(desc(n))
 
-head(people_count)
+head(people_q_count)
 
 # I should also count the people who are answers!
 
@@ -1509,33 +1565,205 @@ person_answers_count <- person_answers %>%
 
 # and I'm going to manually add the women too 
 
-women_counts <- woman_named_df %>% 
+women_q_counts <- woman_named_df %>% 
   filter(names != "") %>% 
   separate_longer_delim(cols = names, delim = ", ") %>%
   group_by(names) %>%
   count() %>% 
   arrange(desc(n))
 
-women_answer_counts <- woman_qs %>% 
+women_a_counts <- woman_qs %>% 
   filter(answer != "") %>% 
   separate_longer_delim(cols = answer, delim = ", ") %>%
   group_by(answer) %>%
   count() %>% 
   arrange(desc(n))
 
-## MESSED UP: ALL WOMEN ARE CURRENTLY COUNTING TWICE IF THEY GOT PICKED UP CORRECTLY BY SPACY
-## FIGURE OUT WHICH ARE DUPLICATES AND IF YOU ACTUALLY NEED TO JOIN THE WOMEN DF 
-
-combined_people_count <- full_join(people_count, person_answers_count, by = c("people" = "a_text")) %>% 
-  full_join(women_counts, by = c("people" = "names")) %>% 
-  full_join(women_answer_counts, by = c("people" = "answer")) %>% 
+women_counts_total <- full_join(women_q_counts, women_a_counts, by = c("names" = "answer")) %>% 
   replace(is.na(.), 0) %>% 
-  mutate(n.total = rowSums(across(where(is.numeric)))) %>% 
-  select(people, n.total) %>% 
+  mutate(n.total = rowSums(across(where(is.numeric)))) %>%
+  select(names, n.total) %>% 
   arrange(desc(n.total))
 
-head(combined_people_count)
+## ABANDONING METHOD BECAUSE IT DIDN'T REALLY WORK -- SpaCy missed a lot of people. 
 ```
 
-So, what are we expecting high schoolers to know? Jesus and the founding fathers. 
+This really didn't work very well - reading through the questions, a lot of people were missed. 
+
+# Re-analyzing the people answers 
+
+The SpaCy approach to identifying questions with people as the answers was not super accurate -- lots of questions about people were not identified, and questions where the answer was not a person WERE identified as people. So, I hand-tagged all the questions for whether the answer is a person, and if that person is a mythological/religious figure. 
+
+```{r people-as-redux}
+nhbb_people_answers <- nhbb_clean %>% 
+  filter(is_person_a == TRUE | is_person_b == TRUE)
+```
+
+```{r people-as-all}
+people_answers_tossups <- as.data.frame(matrix(ncol = 5, nrow = nrow(nhbb_people_answers)))
+colnames(people_answers_tossups) <- c("ID", "answer", "type", "is_myth", "is_woman") 
+
+people_answers_bonus <- as.data.frame(matrix(ncol = 5, nrow = nrow(nhbb_people_answers)))
+colnames(people_answers_bonus) <- c("ID", "answer", "type", "is_myth", "is_woman") 
+
+for(i in 1:nrow(nhbb_people_answers)){
+ if(nhbb_people_answers$is_person_a[i] == T){
+   people_answers_tossups$ID[i] <- nhbb_people_answers$ID[i]
+   people_answers_tossups$answer[i] <- nhbb_people_answers$a_text[i]
+   people_answers_tossups$type[i] <- "tossup"
+   people_answers_tossups$is_myth[i] <- nhbb_people_answers$is_myth_a[i]
+   people_answers_tossups$is_woman[i] <- nhbb_people_answers$is_answer[i]
+ }
+}
+
+for(i in 1:nrow(nhbb_people_answers)){
+ if(nhbb_people_answers$is_person_b[i] == T){
+   people_answers_bonus$ID[i] <- nhbb_people_answers$ID[i]
+   people_answers_bonus$answer[i] <- nhbb_people_answers$bonus_a_text[i]
+   people_answers_bonus$type[i] <- "bonus"
+   people_answers_bonus$is_myth[i] <- nhbb_people_answers$is_myth_b[i]
+   people_answers_bonus$is_woman[i] <-  nhbb_people_answers$is_answer[i]
+ }
+}
+
+people_answers <- rbind(people_answers_tossups, people_answers_bonus) %>% 
+  filter(is.na(ID) == F)
+
+# whoops some questions are accidentally coded as woman answers
+
+for(i in 1:nrow(people_answers)){
+  if(people_answers$answer[i] %in% women_counts_total$names == TRUE |
+     people_answers$answer[i] == "Sappho"){
+    people_answers$is_woman[i] <- TRUE
+  } else{
+    people_answers$is_woman[i] <- FALSE
+  }
+}
+```
+
+```{r answer-counts}
+people_answer_count <- people_answers %>% 
+  group_by(answer) %>% 
+  summarize(total = n()) %>% 
+  arrange(desc(total))
+```
+
+```{r full-people-count}
+all_people_count <- full_join(people_q_count, people_answer_count, by = c("people" = "answer")) %>% 
+  replace(is.na(.), 0) %>%
+  mutate(n.total = rowSums(across(where(is.numeric)))) %>%
+  select(people, n.total) %>%
+  arrange(desc(n.total))
+```
+
+# Chi-Square test of male myth vs female myth proportions
+
+```{r chisq-myth}
+chisq_myth <- as.data.frame(matrix(ncol = 2, nrow = 2))
+rownames(chisq_myth) <- c("myth", "non_myth")
+colnames(chisq_myth) <- c("women", "non_women")
+
+chisq_myth$women[1] <- nrow(people_answers %>% filter(is_myth == T & is_woman == T))
+chisq_myth$women[2] <- nrow(people_answers %>% filter(is_myth == F & is_woman == T))
+chisq_myth$non_women[1] <- nrow(people_answers %>% filter(is_myth == T & is_woman == F))
+chisq_myth$non_women[2] <- nrow(people_answers %>% filter(is_myth == F & is_woman == F))
+
+chisq.test(chisq_myth)
+
+```
+
+# More geographic analysis
+
+## How many unique places are named per continent?
+```{r unique-places}
+
+north_am <- full_place_data %>% 
+  filter(parent_type == "continents" & parent_hierarchy == "North and Central America") 
+
+north_am_unique <- north_am %>% 
+  distinct(place)
+
+europe <- full_place_data %>% 
+  filter(parent_type == "continents" & parent_hierarchy == "Europe")
+
+europe_unique <- europe %>% 
+  distinct(place)
+
+asia <- full_place_data %>% 
+  filter(parent_type == "continents" & parent_hierarchy == "Asia") 
+
+asia_unique <- asia %>% 
+  distinct(place)
+
+africa <- full_place_data %>% 
+  filter(parent_type == "continents" & parent_hierarchy == "Africa") 
+
+africa_unique <- africa %>% 
+  distinct(place)
+
+south_am <- full_place_data %>% 
+  filter(parent_type == "continents" & parent_hierarchy == "South America")
+
+south_am_unique <- south_am %>% 
+  distinct(place)
+
+oceania <- full_place_data %>% 
+  filter(parent_type == "continents" & parent_hierarchy == "Oceania") 
+
+oceania_unique <- oceania %>% 
+  distinct(place)
+
+unique_place_counts <- as.data.frame(matrix(nrow = 6, ncol = 2)) 
+colnames(unique_place_counts) <- c("continent", "n_unique")
+
+unique_place_counts$continent <- c("North and Central America", "Europe", "Asia", "Africa", "South America", "Oceania")
+
+unique_place_counts$n_unique <- c(nrow(north_am_unique), nrow(europe_unique), nrow(asia_unique), nrow(africa_unique),nrow(south_am_unique), nrow(oceania_unique))
+
+unique_place_counts <- unique_place_counts %>% 
+  left_join(cont_counts, by = c("continent" = "place"))
+
+unique_place_counts
+```
+
+## Write questions mentioning places in each continent to separate folders for AntConc
+```{r filter-nhbb-clean-conts}
+# this is also already available under the corpora directory
+# the folder `continents` contains a folder for **each** continent 
+
+# un-comment this block if you want to run it!
+
+# africa_qs <- nhbb_clean %>% 
+#   filter(ID %in% africa$ID == T)
+# 
+# write_txt(africa_qs, "corpora/continents/africa/")
+# 
+# south_am_qs <- nhbb_clean %>% 
+#   filter(ID %in% south_am$ID == T)
+# 
+# write_txt(south_am_qs, "corpora/continents/south_am/")
+# 
+# oceania_qs <- nhbb_clean %>% 
+#   filter(ID %in% oceania$ID == T)
+# 
+# write_txt(oceania_qs, "corpora/continents/oceania/")
+# 
+# europe_qs <- nhbb_clean %>% 
+#   filter(ID %in% europe$ID == T)
+# 
+# write_txt(europe_qs, "corpora/continents/europe/")
+# 
+# asia_qs <- nhbb_clean %>% 
+#   filter(ID %in% asia$ID == T)
+# 
+# write_txt(asia_qs, "corpora/continents/asia/")
+# 
+# north_am_qs <- nhbb_clean %>% 
+#   filter(ID %in% north_am$ID == T)
+# 
+# write_txt(north_am_qs, "corpora/continents/north_am/")
+```
+
+# That's all, folks!
+
 

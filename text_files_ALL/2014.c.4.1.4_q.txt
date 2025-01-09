@@ -1,0 +1,1 @@
+This field of research was what John McCarthy was working on when he invented the LISP programming language in 1959. This field of research is the subject of John Searle's "Chinese Room" argument and is divided into "weak" and "strong" branches. For 10 points, name this field which seeks to duplicate functions of the human brain on computers.   
