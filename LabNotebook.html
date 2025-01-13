@@ -2312,7 +2312,7 @@ source(&quot;~/Desktop/hist426/scripts/write_txt.R&quot;) # change this to your 
 <p><strong>To bypass the need to run the <code>data_prep.R</code>
 script, run the following code block, which loads the complete, cleaned
 dataset as <code>nhbb_clean</code>.</strong></p>
-<pre class="r"><code>nhbb_clean &lt;- read.csv(&quot;data/nhbb_FULL_CLEAN.csv&quot;)</code></pre>
+<pre class="r"><code>nhbb_clean &lt;- read.csv(&quot;nhbb_FULL_CLEAN.csv&quot;)</code></pre>
 </div>
 <div id="quantifying-womens-inclusionexclusion" class="section level1">
 <h1>Quantifying Women’s Inclusion/Exclusion</h1>
@@ -5037,6 +5037,29 @@ folders for AntConc</h2>
 </div>
 <div id="thats-all-folks" class="section level1">
 <h1>That’s all, folks!</h1>
+<pre class="r"><code>library(report)
+cite_packages()</code></pre>
+<pre><code>##   - Bache S, Wickham H (2022). _magrittr: A Forward-Pipe Operator for R_. R package version 2.0.3, &lt;https://CRAN.R-project.org/package=magrittr&gt;.
+##   - Cambon J, Hernangómez D, Belanger C, Possenriede D (2021). &quot;tidygeocoder: An R package for geocoding.&quot; _Journal of Open Source Software_, *6*(65), 3544. doi:10.21105/joss.03544 &lt;https://doi.org/10.21105/joss.03544&gt;, R package version 1.0.5, &lt;https://doi.org/10.21105/joss.03544&gt;.
+##   - Chang W (2023). _extrafont: Tools for Using Fonts_. R package version 0.19, &lt;https://CRAN.R-project.org/package=extrafont&gt;.
+##   - Cheng J, Schloerke B, Karambelkar B, Xie Y (2024). _leaflet: Create Interactive Web Maps with the JavaScript &#39;Leaflet&#39; Library_. R package version 2.2.2, &lt;https://CRAN.R-project.org/package=leaflet&gt;.
+##   - Grolemund G, Wickham H (2011). &quot;Dates and Times Made Easy with lubridate.&quot; _Journal of Statistical Software_, *40*(3), 1-25. &lt;https://www.jstatsoft.org/v40/i03/&gt;.
+##   - Makowski D, Lüdecke D, Patil I, Thériault R, Ben-Shachar M, Wiernik B (2023). &quot;Automated Results Reporting as a Practical Tool to Improve Reproducibility and Methodological Best Practices Adoption.&quot; _CRAN_. &lt;https://easystats.github.io/report/&gt;.
+##   - Müller K, Wickham H (2023). _tibble: Simple Data Frames_. R package version 3.2.1, &lt;https://CRAN.R-project.org/package=tibble&gt;.
+##   - R Core Team (2024). _R: A Language and Environment for Statistical Computing_. R Foundation for Statistical Computing, Vienna, Austria. &lt;https://www.R-project.org/&gt;.
+##   - Schwalb-Willmann J (2024). _basemaps: Accessing Spatial Basemaps in R_. R package version 0.0.8, &lt;https://CRAN.R-project.org/package=basemaps&gt;.
+##   - Ushey K, Allaire J, Tang Y (2024). _reticulate: Interface to &#39;Python&#39;_. R package version 1.40.0, &lt;https://CRAN.R-project.org/package=reticulate&gt;.
+##   - Wickham H (2016). _ggplot2: Elegant Graphics for Data Analysis_. Springer-Verlag New York. ISBN 978-3-319-24277-4, &lt;https://ggplot2.tidyverse.org&gt;.
+##   - Wickham H (2023). _forcats: Tools for Working with Categorical Variables (Factors)_. R package version 1.0.0, &lt;https://CRAN.R-project.org/package=forcats&gt;.
+##   - Wickham H (2023). _stringr: Simple, Consistent Wrappers for Common String Operations_. R package version 1.5.1, &lt;https://CRAN.R-project.org/package=stringr&gt;.
+##   - Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A, Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H (2019). &quot;Welcome to the tidyverse.&quot; _Journal of Open Source Software_, *4*(43), 1686. doi:10.21105/joss.01686 &lt;https://doi.org/10.21105/joss.01686&gt;.
+##   - Wickham H, François R, Henry L, Müller K, Vaughan D (2023). _dplyr: A Grammar of Data Manipulation_. R package version 1.1.4, &lt;https://CRAN.R-project.org/package=dplyr&gt;.
+##   - Wickham H, Henry L (2023). _purrr: Functional Programming Tools_. R package version 1.0.2, &lt;https://CRAN.R-project.org/package=purrr&gt;.
+##   - Wickham H, Hester J, Bryan J (2024). _readr: Read Rectangular Text Data_. R package version 2.1.5, &lt;https://CRAN.R-project.org/package=readr&gt;.
+##   - Wickham H, Pedersen T, Seidel D (2023). _scales: Scale Functions for Visualization_. R package version 1.3.0, &lt;https://CRAN.R-project.org/package=scales&gt;.
+##   - Wickham H, Vaughan D, Girlich M (2024). _tidyr: Tidy Messy Data_. R package version 1.3.1, &lt;https://CRAN.R-project.org/package=tidyr&gt;.
+##   - Xie Y (2024). _knitr: A General-Purpose Package for Dynamic Report Generation in R_. R package version 1.49, &lt;https://yihui.org/knitr/&gt;. Xie Y (2015). _Dynamic Documents with R and knitr_, 2nd edition. Chapman and Hall/CRC, Boca Raton, Florida. ISBN 978-1498716963, &lt;https://yihui.org/knitr/&gt;. Xie Y (2014). &quot;knitr: A Comprehensive Tool for Reproducible Research in R.&quot; In Stodden V, Leisch F, Peng RD (eds.), _Implementing Reproducible Computational Research_. Chapman and Hall/CRC. ISBN 978-1466561595.
+##   - Zhu H (2024). _kableExtra: Construct Complex Table with &#39;kable&#39; and Pipe Syntax_. R package version 1.4.0, &lt;https://CRAN.R-project.org/package=kableExtra&gt;.</code></pre>
 </div>
 
 

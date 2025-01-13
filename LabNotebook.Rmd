@@ -1766,4 +1766,8 @@ unique_place_counts
 
 # That's all, folks!
 
+```{r}
+library(report)
+cite_packages()
+```
 
